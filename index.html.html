@@ -744,13 +744,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="btn" onclick="generateIAAnalysis()" id="ia-btn">
           ✨ Gerar análise
         </button>
+        <button class="btn-s" onclick="toggleGeminiConfig()" id="ia-config-btn" title="Configurar chave da API">⚙️</button>
       </div>
     </div>
+
+    <!-- Gemini API key config (shown only when needed) -->
+    <div id="ia-config-panel" style="display:none;background:var(--lil50);border-radius:12px;padding:16px;margin-bottom:16px;border:1.5px solid var(--lil200)">
+      <div style="font-size:13px;font-weight:600;color:var(--lil700);margin-bottom:8px">🔑 Configurar chave do Gemini (Google AI)</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">
+        Obtenha sua chave gratuita em <a href="https://aistudio.google.com" target="_blank" style="color:var(--lil600)">aistudio.google.com</a> → "Get API Key" → "Create API Key"
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="password" id="gemini-key-input" placeholder="AIza..." style="flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--bdr);font-size:13px;outline:none;font-family:inherit" oninput="updateGeminiKeyStatus()">
+        <button class="btn" onclick="saveGeminiKey()">Salvar</button>
+        <button class="btn-s del" onclick="clearGeminiKey()">Remover</button>
+      </div>
+      <div id="gemini-key-status" style="font-size:11px;margin-top:8px"></div>
+    </div>
+
     <div id="ia-output">
       <div style="text-align:center;padding:32px 20px;color:var(--txm)">
         <div style="font-size:32px;margin-bottom:12px">🤖</div>
         <div style="font-size:14px;font-weight:500;color:var(--tx2);margin-bottom:6px">Análise ainda não gerada</div>
-        <div style="font-size:13px">Selecione o mês e clique em "Gerar análise" para receber um resumo inteligente com recomendações personalizadas baseadas nos seus dados reais.</div>
+        <div style="font-size:13px">Selecione o mês e clique em "Gerar análise". <br>Configure sua chave do Gemini (gratuita) clicando em ⚙️ acima.</div>
       </div>
     </div>
     <div id="ia-history" style="margin-top:16px;display:none">
@@ -1235,7 +1251,7 @@ function showPage(id,el){
   if(id==='tarefas')renderTarefas();
   if(id==='precall')renderPrecallPage();
   if(id==='cadencias')renderCadencias();
-  if(id==='qualificacao')renderQualificacao();
+  if(id==='qualificacao'){renderQualificacao();setTimeout(updateGeminiKeyStatus,100);}
 }
 
 function toggleNavDropdown(e,menuId){
@@ -2911,10 +2927,61 @@ QUALIFICAÇÃO (scores 0-5):
 Formate a resposta em seções com títulos claros usando ### para h3. Seja direta e útil.`;
 }
 
+// ═══ GEMINI KEY MANAGEMENT ═══
+const GEMINI_KEY_STORAGE = 'insight_sales_gemini_key';
+
+function getGeminiKey(){ return localStorage.getItem(GEMINI_KEY_STORAGE)||''; }
+function saveGeminiKey(){
+  const val = document.getElementById('gemini-key-input').value.trim();
+  if(!val){ alert('Cole sua chave do Gemini (começa com AIza...)'); return; }
+  localStorage.setItem(GEMINI_KEY_STORAGE, val);
+  updateGeminiKeyStatus();
+  document.getElementById('ia-config-panel').style.display='none';
+}
+function clearGeminiKey(){
+  localStorage.removeItem(GEMINI_KEY_STORAGE);
+  document.getElementById('gemini-key-input').value='';
+  updateGeminiKeyStatus();
+}
+function toggleGeminiConfig(){
+  const panel = document.getElementById('ia-config-panel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if(!isOpen){
+    const key = getGeminiKey();
+    const inp = document.getElementById('gemini-key-input');
+    if(key) inp.value = key;
+    inp.focus();
+    updateGeminiKeyStatus();
+  }
+}
+function updateGeminiKeyStatus(){
+  const key = document.getElementById('gemini-key-input').value.trim() || getGeminiKey();
+  const el = document.getElementById('gemini-key-status');
+  if(!el) return;
+  if(key && key.startsWith('AIza')){
+    el.innerHTML = '<span style="color:var(--mn500)">✅ Chave válida configurada — pronta para usar</span>';
+  } else if(key) {
+    el.innerHTML = '<span style="color:#A32D2D">⚠️ Chave inválida — deve começar com AIza...</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--txm)">Sem chave configurada</span>';
+  }
+}
+
 async function generateIAAnalysis() {
   const mKey = document.getElementById('ia-mes-select').value;
   const d = D[mKey];
   if (!d) { alert('Mês não encontrado.'); return; }
+
+  const apiKey = getGeminiKey();
+  if (!apiKey) {
+    toggleGeminiConfig();
+    document.getElementById('ia-output').innerHTML = `<div style="padding:20px;color:var(--lil700);background:var(--lil50);border-radius:10px;font-size:13px;text-align:center">
+      <strong>Configure sua chave do Gemini</strong> clicando em ⚙️ acima para gerar análises com IA.<br>
+      <span style="font-size:12px;color:var(--txm)">É gratuito — acesse aistudio.google.com para criar sua chave.</span>
+    </div>`;
+    return;
+  }
 
   const prompt = buildAnalysisPrompt(mKey);
   if (!prompt) return;
@@ -2927,47 +2994,49 @@ async function generateIAAnalysis() {
   output.innerHTML = `<div class="ia-loading"><div class="ia-spinner"></div>Analisando os dados de ${d.label}... aguarde alguns segundos.</div>`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1200, temperature: 0.7 }
       })
     });
 
     const data = await response.json();
-    const text = data.content?.map(b => b.text || '').join('') || '';
 
+    if (data.error) throw new Error(data.error.message || 'Erro na API do Gemini');
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (!text) throw new Error('Resposta vazia da API');
 
-    // Parse markdown-ish text to HTML
+    // Parse markdown to HTML
     const html = text
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/^- (.+)$/gm, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>\n?)+/gs, m => `<ul>${m}</ul>`)
+      .replace(/^• (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>[^<]*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
       .replace(/\n\n/g, '</p><p>')
-      .replace(/^(?!<[hup])/gm, '')
-      .replace(/(<\/h3>|<\/ul>)\s*(<[^h])/g, '$1<p>$2')
-      .replace(/<p><\/p>/g, '');
+      .replace(/<p><\/p>/g, '')
+      .replace(/(<\/h3>)\s*<p>/g, '$1');
 
     output.innerHTML = `<div class="ia-body"><p>${html}</p></div>
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--lil50);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div style="font-size:11px;color:var(--txm)">Gerado em ${new Date().toLocaleDateString('pt-BR')} · ${d.label}</div>
+        <div style="font-size:11px;color:var(--txm)">Gerado em ${new Date().toLocaleDateString('pt-BR')} · ${d.label} · Gemini 1.5 Flash</div>
         <button class="btn-s" onclick="saveIAAnalysis('${mKey}', this)">💾 Salvar análise</button>
       </div>`;
 
     btn.disabled = false;
     btn.textContent = '✨ Gerar novamente';
-    // Store text on the button for saving
-    btn.dataset.lastText = text;
-    btn.dataset.lastMes = mKey;
 
   } catch (err) {
+    const isKeyError = err.message.toLowerCase().includes('api key') || err.message.includes('400') || err.message.includes('403');
     output.innerHTML = `<div style="padding:20px;color:#A32D2D;background:#FFF0F0;border-radius:10px;font-size:13px">
       <strong>Erro ao gerar análise:</strong> ${err.message}<br>
+      ${isKeyError ? '<span style="color:var(--txm)">Verifique se a chave do Gemini está correta em ⚙️.</span>' : ''}
       <small style="color:var(--txm);margin-top:6px;display:block">Verifique sua conexão e tente novamente.</small>
     </div>`;
     btn.disabled = false;

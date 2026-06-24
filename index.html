@@ -1377,6 +1377,45 @@ function getLiveReunioesCount(m){
     noshow:reus.filter(r=>r.s==='No-show').length
   };
 }
+
+// ═══ FONTE ÚNICA DE VERDADE: usada tanto pelo Reports quanto pelo Comparativo ═══
+// Garante que os números mostrados em Comparativo sejam SEMPRE idênticos aos do Reports
+function getLiveMonthData(m){
+  const d=D[m]; const mes=d.label;
+
+  const pcs=allPreCalls.filter(p=>p.m===mes);
+  const preCallAg=pcs.length>0?pcs.length:d.preCallAg;
+  const preCallFeitas=pcs.length>0?pcs.filter(p=>p.s==='Realizada').length:d.preCallFeitas;
+  const preCallNA=pcs.length>0?pcs.filter(p=>p.s==='No-show').length:d.preCallNA;
+
+  const reuAll=allR.filter(r=>r.m===mes&&!r._fromOb);
+  const leadQual=reuAll.length>0?reuAll.length:d.leadQual;
+  const reunioes=reuAll.length>0?reuAll.filter(r=>r.s==='Realizada').length:d.reunioes;
+  const noShowCloser=reuAll.length>0?reuAll.filter(r=>r.s==='No-show').length:d.noShowCloser;
+
+  const liveCons=allC.filter(c=>c.m===mes);
+  const cMes=liveCons.length>0?liveCons.filter(c=>c.t==='Lead do mês'||c.t==='Lead do mes').length:d.cMes;
+  const cAntigo=liveCons.length>0?liveCons.filter(c=>c.t==='Lead antigo').length:d.cAntigo;
+  const totalContratos=cMes+cAntigo;
+
+  const txShowPre=preCallAg>0?preCallFeitas/preCallAg:d.txShowPre;
+  const txLeadsPreCall=d.leads>0?preCallAg/d.leads:d.txLeadsPreCall;
+  const txPreCallQual=preCallFeitas>0?leadQual/preCallFeitas:d.txPreCallQual;
+  const txQualReu=leadQual>0?reunioes/leadQual:d.txQualReu;
+  const txReuContratoTotal=reunioes>0?totalContratos/reunioes:d.txReuContratoTotal;
+  const txConv=d.leads>0?totalContratos/d.leads:d.txConv;
+
+  return{
+    leads:d.leads, label:d.label,
+    preCallAg, preCallFeitas, preCallNA,
+    leadQual, reunioes, noShowCloser,
+    cMes, cAntigo, totalContratos,
+    txShowPre, txLeadsPreCall, txPreCallQual, txQualReu, txReuContratoTotal, txConv,
+    // campos que não têm versão "ao vivo" própria — vêm direto de D[m]
+    txCloser:d.txCloser, fupWA:d.fupWA||0, fupIG:d.fupIG||0, fupQuente:d.fupQuente||0,
+    fupMorno:d.fupMorno||0, fupFrio:d.fupFrio||0, lost:d.lost, erroFup:d.erroFup
+  };
+}
 function renderPre(m){
   const d=D[m];
   const live=getPreCallCounts(m);
@@ -1577,6 +1616,8 @@ function renderComissoes(){
 function renderComparativo(){
   const meses=Object.keys(D).filter(k=>MONTH_ORDER.includes(k)).sort((a,b)=>MONTH_ORDER.indexOf(a)-MONTH_ORDER.indexOf(b));
   const lbls=meses.map(m=>D[m].label);
+  // Usa a mesma fonte de dados "ao vivo" que o Reports usa, para nunca dessincronizar
+  const L={}; meses.forEach(m=>{L[m]=getLiveMonthData(m);});
   // Summary cards: one per month with key numbers + MoM delta vs previous month
   const sumColors=['#E0CEF5','#C4A3E8','#9B72C8','#7B4FBF'];
   function momBadge(curVal,prevVal){
@@ -1586,9 +1627,9 @@ function renderComparativo(){
     return `<span style="font-size:9px;font-weight:700;margin-left:4px;opacity:.95">${arrow}${diff>=0?'+':''}${diff.toFixed(0)}%</span>`;
   }
   document.getElementById('comp-summary').innerHTML=meses.map((m,i)=>{
-    const d=D[m];const tot=d.cMes+d.cAntigo;
-    const prevD=i>0?D[meses[i-1]]:null;
-    const prevTot=prevD?prevD.cMes+prevD.cAntigo:undefined;
+    const d=L[m];const tot=d.totalContratos;
+    const prevD=i>0?L[meses[i-1]]:null;
+    const prevTot=prevD?prevD.totalContratos:undefined;
     return`<div style="background:${sumColors[i]};border-radius:16px;padding:18px 20px">
       <div style="font-size:12px;font-weight:700;color:#fff;opacity:.8;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">${d.label}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -1649,39 +1690,39 @@ function renderComparativo(){
     {label:'Leads recebidos',fn:d=>d.leads,hi:true},
     {label:'Pré-calls realizadas',fn:d=>d.preCallFeitas,hi:true},
     {label:'Reuniões com Closer',fn:d=>d.reunioes,hi:true},
-    {label:'Total de contratos',fn:d=>d.cMes+d.cAntigo,hi:true},
+    {label:'Total de contratos',fn:d=>d.totalContratos,hi:true},
     {label:'Lead do mês',fn:d=>d.cMes,hi:true},
     {label:'Lead antigo',fn:d=>d.cAntigo,hi:true},
-  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(D[m])),r.hi)).join('');
+  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(L[m])),r.hi)).join('');
 
   document.getElementById('comp-precall').innerHTML=[
     {label:'Show rate pré-call',fn:d=>pct(d.txShowPre),hi:true},
     {label:'Leads → pré-call agendada',fn:d=>pct(d.txLeadsPreCall),hi:true},
     {label:'Pré-call → qualificado',fn:d=>pct(d.txPreCallQual),hi:true},
     {label:'Qualificados p/ closer',fn:d=>d.leadQual,hi:true},
-  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(D[m])),r.hi)).join('');
+  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(L[m])),r.hi)).join('');
 
   document.getElementById('comp-closer').innerHTML=[
     {label:'Reunião → contrato',fn:d=>pct(d.txReuContratoTotal),hi:true},
     {label:'Taxa global leads→contrato',fn:d=>pct(d.txConv),hi:true},
     {label:'Taxa leads→closer',fn:d=>pct(d.txCloser||d.txConv),hi:true},
     {label:'No-show Closer',fn:d=>d.noShowCloser,hi:false},
-  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(D[m])),r.hi)).join('');
+  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(L[m])),r.hi)).join('');
 
   document.getElementById('comp-lost').innerHTML=[
     {label:'Em Follow Up total',fn:d=>d.fupWA+d.fupIG+d.fupQuente+d.fupMorno+d.fupFrio,hi:true},
     {label:'Lead Quente (FUP)',fn:d=>d.fupQuente||0,hi:true},
     {label:'LOST',fn:d=>d.lost,hi:false},
     {label:'Erro Follow Up',fn:d=>d.erroFup,hi:false},
-  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(D[m])),r.hi)).join('');
+  ].map(r=>makeMetricRow(r.label,meses.map(m=>r.fn(L[m])),r.hi)).join('');
 
   // Charts
   if(cComp1){cComp1.destroy();cComp1=null;}
   cComp1=new Chart(document.getElementById('cComp1'),{type:'bar',
     data:{labels:lbls,datasets:[
-      {label:'Lead do mês',data:meses.map(m=>D[m].cMes),backgroundColor:'#9B72C8',borderRadius:[5,5,0,0],borderWidth:0,stack:'c'},
-      {label:'Lead antigo',data:meses.map(m=>D[m].cAntigo),backgroundColor:'#DCC6F2',borderRadius:[5,5,0,0],borderWidth:0,stack:'c'},
-      {type:'line',label:'Leads recebidos',data:meses.map(m=>D[m].leads),borderColor:'#D4537E',backgroundColor:'rgba(212,83,126,.06)',tension:.4,fill:true,pointRadius:5,pointBackgroundColor:'#D4537E',borderWidth:2.5,yAxisID:'y2'},
+      {label:'Lead do mês',data:meses.map(m=>L[m].cMes),backgroundColor:'#9B72C8',borderRadius:[5,5,0,0],borderWidth:0,stack:'c'},
+      {label:'Lead antigo',data:meses.map(m=>L[m].cAntigo),backgroundColor:'#DCC6F2',borderRadius:[5,5,0,0],borderWidth:0,stack:'c'},
+      {type:'line',label:'Leads recebidos',data:meses.map(m=>L[m].leads),borderColor:'#D4537E',backgroundColor:'rgba(212,83,126,.06)',tension:.4,fill:true,pointRadius:5,pointBackgroundColor:'#D4537E',borderWidth:2.5,yAxisID:'y2'},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>lbls[c[0].dataIndex],label:c=>` ${c.dataset.label}: ${c.parsed.y}`}}},
@@ -1692,9 +1733,9 @@ function renderComparativo(){
   if(cComp2){cComp2.destroy();cComp2=null;}
   cComp2=new Chart(document.getElementById('cComp2'),{type:'line',
     data:{labels:lbls,datasets:[
-      {label:'Show rate',data:meses.map(m=>+(D[m].txShowPre*100).toFixed(1)),borderColor:'#9B72C8',backgroundColor:'rgba(155,114,200,.08)',fill:true,tension:.35,pointRadius:4,borderWidth:2},
-      {label:'Leads→closer',data:meses.map(m=>+(D[m].txCloser*100||D[m].txConv*100).toFixed(1)),borderColor:'#D4537E',borderDash:[5,3],tension:.35,pointRadius:4,borderWidth:2},
-      {label:'Reunião→contrato',data:meses.map(m=>+(D[m].txReuContratoTotal*100).toFixed(1)),borderColor:'#1D9E75',borderDash:[2,2],tension:.35,pointRadius:4,borderWidth:2},
+      {label:'Show rate',data:meses.map(m=>+(L[m].txShowPre*100).toFixed(1)),borderColor:'#9B72C8',backgroundColor:'rgba(155,114,200,.08)',fill:true,tension:.35,pointRadius:4,borderWidth:2},
+      {label:'Leads→closer',data:meses.map(m=>+((L[m].txCloser||L[m].txConv)*100).toFixed(1)),borderColor:'#D4537E',borderDash:[5,3],tension:.35,pointRadius:4,borderWidth:2},
+      {label:'Reunião→contrato',data:meses.map(m=>+(L[m].txReuContratoTotal*100).toFixed(1)),borderColor:'#1D9E75',borderDash:[2,2],tension:.35,pointRadius:4,borderWidth:2},
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{x:{grid:{display:false},ticks:{color:'#B0A0C0'}},y:{grid:{color:'rgba(196,163,232,.15)'},ticks:{color:'#B0A0C0',callback:v=>v+'%'}}}}});
@@ -1816,15 +1857,22 @@ function renderLeadsAnalytics(){
 // ═══════════════════════════════════════════════
 // TAREFAS & PROJETOS
 // ═══════════════════════════════════════════════
-function todayStr(){return new Date().toISOString().slice(0,10);} // YYYY-MM-DD
+function todayStr(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+} // YYYY-MM-DD no fuso horário LOCAL (corrige bug de tarefas somerem 1 dia antes do esperado)
 
 function checkDailyReset(){
   const lastDate=localStorage.getItem('insight_sales_last_day');
   const today=todayStr();
   if(lastDate&&lastDate!==today){
-    // Dia mudou: desmarca tarefas fixas (não apaga), e limpa tarefas "de hoje" que não têm data futura agendada
+    // Dia mudou: desmarca tarefas fixas (não apaga), e limpa tarefas "de hoje" que já passaram
+    // Mantém tarefas agendadas para HOJE ou para o futuro (>=, não > — corrige bug que apagava a tarefa do próprio dia)
     allTasksFixas.forEach(t=>{t.done=false;});
-    allTasksHoje=allTasksHoje.filter(t=>t.date&&t.date>today); // mantém só agendadas para o futuro
+    allTasksHoje=allTasksHoje.filter(t=>t.date&&t.date>=today);
     saveState();
   }
   localStorage.setItem('insight_sales_last_day',today);

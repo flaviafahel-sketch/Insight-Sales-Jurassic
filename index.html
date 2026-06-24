@@ -558,6 +558,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 
+  <!-- DEDUPLICATION TOOL -->
+  <div class="card rf" style="background:var(--pc100);border-color:#FBCEB0">
+    <div class="ct" style="margin-bottom:12px"><span class="dot c"></span>🧹 Limpar registros duplicados</div>
+    <p style="font-size:13px;color:var(--tx2);margin-bottom:14px;line-height:1.6">
+      Se algum número parecer "dobrado" no Reports ou Comparativo (ex: reuniões ou contratos contados em excesso), use esta ferramenta. Ela remove reuniões, contratos e pré-calls <strong>idênticos</strong> (mesmo nome + mesmo mês + mesma origem), mantendo só uma cópia de cada. Não afeta tarefas, cadências ou leads pré-call detalhados.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn" style="background:var(--pc500)" onclick="cleanDuplicates()">🧹 Limpar duplicados agora</button>
+      <span id="dedup-status" style="font-size:12px;color:#9E4A10;font-weight:500"></span>
+    </div>
+  </div>
+
   <div class="r2" style="margin-bottom:24px">
     <div>
       <div class="upz" id="upz" onclick="document.getElementById('finp').click()">
@@ -1117,37 +1129,37 @@ const COMM_CON={'Inbound':35,'Inbound reengajado':55,'Outbound indicação':100,
 
 // ═══ DATA ═══
 const D={
-  mar:{label:'Marco',leads:212,preCallAg:41,preCallFeitas:32,preCallNA:9,leadQual:19,reunioes:17,noShowCloser:2,cMes:5,cAntigo:4,
+  mar:{label:'Março',leads:212,preCallAg:41,preCallFeitas:32,preCallNA:9,leadQual:19,reunioes:17,noShowCloser:2,cMes:5,cAntigo:4,
     fupWA:33,fupIG:20,fupSucesso:12,fupQuente:0,fupMorno:0,fupFrio:0,erroFup:44,lostMomento:10,lost:67,
     txShowPre:0.7805,txConv:0.02358,txCloser:0.08962,txLeadsPreCall:0.1934,txPreCallQual:0.59375,txQualReu:0.8947,txReuContratoTotal:0.5294,
     origRIn:13,origRReeng:2,origROutInd:1,origROut:1,
     perdas:[{l:'LQ - Preco fora do orcamento',n:18},{l:'D - Fornecedor tentando vender',n:10},{l:'D - Nao e produtor de evento',n:8},{l:'LQ - Evento muito pequeno',n:8},{l:'LQ - Nao consegui contato',n:6},{l:'LQ - So queria entender',n:6},{l:'LQ - Ainda validando projeto',n:5},{l:'LQ - Fechou com outra agencia',n:2},{l:'LQ - Nao viu valor suficiente',n:2},{l:'D - Busca emprego/vaga',n:1},{l:'LQ - Decidiu nao investir',n:1},{l:'LQ - Evento pausado',n:1}],
     daily:{'01':3,'02':5,'03':5,'04':10,'05':6,'06':4,'07':1,'08':3,'09':9,'10':11,'11':20,'12':11,'13':10,'14':2,'15':1,'16':5,'17':3,'18':7,'19':7,'20':8,'21':1,'22':2,'23':5,'24':14,'25':7,'26':6,'27':7,'28':3,'29':6,'30':9,'31':21},
     reunioes_data:[
-      {n:'MultiA / Andre Carlos',f:'Indicacao',o:'Outbound indicacao',m:'Marco',s:'Realizada'},
-      {n:'Fernando De Paula',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Matheus Picussa / Samp Fest',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Anibal De Quadros Domingues',f:'Sem informacao',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'World Soccer Consultoria',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Romario / Terratronic',f:'Sem informacao',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Luciana Araujo / Revista Jurema',f:'Cadencia Bodkin',o:'Inbound reengajado',m:'Marco',s:'Realizada'},
-      {n:'Elias Mello / Vibe do Reino',f:'Instagram DM',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Gui Uzuelli',f:'Seguidores DM',o:'Outbound',m:'Marco',s:'Realizada'},
-      {n:'Ballare / Maratona do Maganta',f:'Seguidores DM',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'GL Producoes de eventos',f:'Seguidores DM',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Caio / Baile das Atleticas',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Otavio Resende / NODE',f:'Cadencia Bodkin',o:'Inbound reengajado',m:'Marco',s:'Realizada'},
-      {n:'Alexsander Cunha',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Murilo Almeida / Dust Pub & Absoluta',f:'Assessoria De Trafego 2025',o:'Inbound',m:'Marco',s:'Realizada'},
-      {n:'Karina - CBAGO',f:'Indicacao',o:'Outbound',m:'Marco',s:'Realizada'},
-      {n:'Gabriel - Complexo Fora do Eixo',f:'Assessoria De Trafego 2025',o:'Inbound',m:'Marco',s:'Realizada'},
+      {n:'MultiA / Andre Carlos',f:'Indicacao',o:'Outbound indicacao',m:'Março',s:'Realizada'},
+      {n:'Fernando De Paula',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Matheus Picussa / Samp Fest',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Anibal De Quadros Domingues',f:'Sem informacao',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'World Soccer Consultoria',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Romario / Terratronic',f:'Sem informacao',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Luciana Araujo / Revista Jurema',f:'Cadencia Bodkin',o:'Inbound reengajado',m:'Março',s:'Realizada'},
+      {n:'Elias Mello / Vibe do Reino',f:'Instagram DM',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Gui Uzuelli',f:'Seguidores DM',o:'Outbound',m:'Março',s:'Realizada'},
+      {n:'Ballare / Maratona do Maganta',f:'Seguidores DM',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'GL Producoes de eventos',f:'Seguidores DM',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Caio / Baile das Atleticas',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Otavio Resende / NODE',f:'Cadencia Bodkin',o:'Inbound reengajado',m:'Março',s:'Realizada'},
+      {n:'Alexsander Cunha',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Murilo Almeida / Dust Pub & Absoluta',f:'Assessoria De Trafego 2025',o:'Inbound',m:'Março',s:'Realizada'},
+      {n:'Karina - CBAGO',f:'Indicacao',o:'Outbound',m:'Março',s:'Realizada'},
+      {n:'Gabriel - Complexo Fora do Eixo',f:'Assessoria De Trafego 2025',o:'Inbound',m:'Março',s:'Realizada'},
     ],
     contratos_data:[
-      {n:'Caio Babilonia',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',t:'Lead do mes',fla:true},
-      {n:'GL Producoes de eventos',f:'Seguidores DM',o:'Inbound',m:'Marco',t:'Lead do mes',fla:true},
-      {n:'Murilo Almeida / Dust Pub',f:'ebook',o:'Inbound',m:'Marco',t:'Lead do mes',fla:true},
-      {n:'Romario Barros',f:'Seguidores DM',o:'Inbound',m:'Marco',t:'Lead do mes',fla:true},
-      {n:'World Soccer Consultoria',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Marco',t:'Lead do mes',fla:true},
+      {n:'Caio Babilonia',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',t:'Lead do mês',fla:true},
+      {n:'GL Producoes de eventos',f:'Seguidores DM',o:'Inbound',m:'Março',t:'Lead do mês',fla:true},
+      {n:'Murilo Almeida / Dust Pub',f:'ebook',o:'Inbound',m:'Março',t:'Lead do mês',fla:true},
+      {n:'Romario Barros',f:'Seguidores DM',o:'Inbound',m:'Março',t:'Lead do mês',fla:true},
+      {n:'World Soccer Consultoria',f:'[abo] Assessoria Growth Marketing',o:'Inbound',m:'Março',t:'Lead do mês',fla:true},
     ]
   },
   abr:{label:'Abril',leads:222,preCallAg:36,preCallFeitas:30,preCallNA:6,leadQual:18,reunioes:15,noShowCloser:3,cMes:4,cAntigo:4,
@@ -1226,8 +1238,8 @@ const D={
       {n:'Pedro Maciel / Run Music',f:'—',o:'Inbound',m:'Junho',s:'Realizada'},
     ],
     contratos_data:[
-      {n:'Ze Alvez',f:'Indicacao (Juliana - Savage)',o:'Outbound indicacao',m:'Junho',t:'Lead do mes',fla:true},
-      {n:'Adriano / Festival Sareva',f:'Pesquisa no Instagram',o:'Outbound',m:'Junho',t:'Lead do mes',fla:true},
+      {n:'Ze Alvez',f:'Indicacao (Juliana - Savage)',o:'Outbound indicacao',m:'Junho',t:'Lead do mês',fla:true},
+      {n:'Adriano / Festival Sareva',f:'Pesquisa no Instagram',o:'Outbound',m:'Junho',t:'Lead do mês',fla:true},
     ]
   }
 };
@@ -1359,7 +1371,7 @@ function renderFUP(m){
 // ═══ PRÉ-CALL CHART ═══
 function getPreCallCounts(m){
   const mes=D[m].label;
-  const pcs=allPreCalls.filter(p=>p.m===mes);
+  const pcs=allPreCalls.filter(p=>normTxt(p.m)===normTxt(mes));
   if(pcs.length===0)return null; // fallback to D[m] static data
   return{
     ag:pcs.length,
@@ -1369,7 +1381,7 @@ function getPreCallCounts(m){
 }
 function getLiveReunioesCount(m){
   const mes=D[m].label;
-  const reus=allR.filter(r=>r.m===mes&&!r._fromOb);
+  const reus=allR.filter(r=>normTxt(r.m)===normTxt(mes)&&!r._fromOb);
   if(reus.length===0)return null;
   return{
     total:reus.length,
@@ -1380,22 +1392,27 @@ function getLiveReunioesCount(m){
 
 // ═══ FONTE ÚNICA DE VERDADE: usada tanto pelo Reports quanto pelo Comparativo ═══
 // Garante que os números mostrados em Comparativo sejam SEMPRE idênticos aos do Reports
-function getLiveMonthData(m){
-  const d=D[m]; const mes=d.label;
+// Remove acentos para comparações resilientes a inconsistências de digitação (ex: "Marco" vs "Março")
+function normTxt(s){
+  return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
 
-  const pcs=allPreCalls.filter(p=>p.m===mes);
+function getLiveMonthData(m){
+  const d=D[m]; const mes=d.label; const mesNorm=normTxt(mes);
+
+  const pcs=allPreCalls.filter(p=>normTxt(p.m)===mesNorm);
   const preCallAg=pcs.length>0?pcs.length:d.preCallAg;
   const preCallFeitas=pcs.length>0?pcs.filter(p=>p.s==='Realizada').length:d.preCallFeitas;
   const preCallNA=pcs.length>0?pcs.filter(p=>p.s==='No-show').length:d.preCallNA;
 
-  const reuAll=allR.filter(r=>r.m===mes&&!r._fromOb);
+  const reuAll=allR.filter(r=>normTxt(r.m)===mesNorm&&!r._fromOb);
   const leadQual=reuAll.length>0?reuAll.length:d.leadQual;
   const reunioes=reuAll.length>0?reuAll.filter(r=>r.s==='Realizada').length:d.reunioes;
   const noShowCloser=reuAll.length>0?reuAll.filter(r=>r.s==='No-show').length:d.noShowCloser;
 
-  const liveCons=allC.filter(c=>c.m===mes);
-  const cMes=liveCons.length>0?liveCons.filter(c=>c.t==='Lead do mês'||c.t==='Lead do mes').length:d.cMes;
-  const cAntigo=liveCons.length>0?liveCons.filter(c=>c.t==='Lead antigo').length:d.cAntigo;
+  const liveCons=allC.filter(c=>normTxt(c.m)===mesNorm);
+  const cMes=liveCons.length>0?liveCons.filter(c=>normTxt(c.t)==='lead do mes').length:d.cMes;
+  const cAntigo=liveCons.length>0?liveCons.filter(c=>normTxt(c.t)==='lead antigo').length:d.cAntigo;
   const totalContratos=cMes+cAntigo;
 
   const txShowPre=preCallAg>0?preCallFeitas/preCallAg:d.txShowPre;
@@ -1404,13 +1421,15 @@ function getLiveMonthData(m){
   const txQualReu=leadQual>0?reunioes/leadQual:d.txQualReu;
   const txReuContratoTotal=reunioes>0?totalContratos/reunioes:d.txReuContratoTotal;
   const txConv=d.leads>0?totalContratos/d.leads:d.txConv;
+  // Taxa de conversão "pura" do mês: só contratos vindos de leads DESSE mês (exclui leads antigos reativados)
+  const txConvMes=d.leads>0?cMes/d.leads:0;
 
   return{
     leads:d.leads, label:d.label,
     preCallAg, preCallFeitas, preCallNA,
     leadQual, reunioes, noShowCloser,
     cMes, cAntigo, totalContratos,
-    txShowPre, txLeadsPreCall, txPreCallQual, txQualReu, txReuContratoTotal, txConv,
+    txShowPre, txLeadsPreCall, txPreCallQual, txQualReu, txReuContratoTotal, txConv, txConvMes,
     // campos que não têm versão "ao vivo" própria — vêm direto de D[m]
     txCloser:d.txCloser, fupWA:d.fupWA||0, fupIG:d.fupIG||0, fupQuente:d.fupQuente||0,
     fupMorno:d.fupMorno||0, fupFrio:d.fupFrio||0, lost:d.lost, erroFup:d.erroFup
@@ -1432,12 +1451,12 @@ function renderPre(m){
 function renderFunnel1(m){
   const d=D[m]; const mes=d.label;
   // Pré-calls: always from allPreCalls when any exist, else D[m]
-  const pcs=allPreCalls.filter(p=>p.m===mes);
+  const pcs=allPreCalls.filter(p=>normTxt(p.m)===normTxt(mes));
   const ag=pcs.length>0?pcs.length:d.preCallAg;
   const feitas=pcs.length>0?pcs.filter(p=>p.s==='Realizada').length:d.preCallFeitas;
   const na=pcs.length>0?pcs.filter(p=>p.s==='No-show').length:d.preCallNA;
   // Qualificados = ALL entries in allR for this month (any status), else D[m]
-  const reuAll=allR.filter(r=>r.m===mes&&!r._fromOb);
+  const reuAll=allR.filter(r=>normTxt(r.m)===normTxt(mes)&&!r._fromOb);
   const qual=reuAll.length>0?reuAll.length:d.leadQual;
   const showRate=ag>0?feitas/ag:d.txShowPre;
   const preCallQual=feitas>0?qual/feitas:d.txPreCallQual;
@@ -1451,11 +1470,11 @@ function renderFunnel1(m){
 function renderFunnel2(m){
   const d=D[m]; const mes=d.label;
   // Qualificados = ALL allR entries (any status) for this month
-  const reuAll=allR.filter(r=>r.m===mes&&!r._fromOb);
+  const reuAll=allR.filter(r=>normTxt(r.m)===normTxt(mes)&&!r._fromOb);
   const qual=reuAll.length>0?reuAll.length:d.leadQual;
   // Reuniões feitas = only Realizada in allR
   const reunioes=reuAll.length>0?reuAll.filter(r=>r.s==='Realizada').length:d.reunioes;
-  const liveCons=allC.filter(c=>c.m===mes);
+  const liveCons=allC.filter(c=>normTxt(c.m)===normTxt(mes));
   const cMes=liveCons.length>0?liveCons.filter(c=>c.t==='Lead do mês'||c.t==='Lead do mes').length:d.cMes;
   const cAntigo=liveCons.length>0?liveCons.filter(c=>c.t==='Lead antigo').length:d.cAntigo;
   const tot=cMes+cAntigo;
@@ -1495,7 +1514,7 @@ function renderFunnel2(m){
 // ═══ ORIGEM REUNIÕES CLOSER (realizadas only) ═══
 function renderOrigR(m){
   const d=D[m]; const mes=d.label;
-  const reuR=allR.filter(r=>r.m===mes&&!r._fromOb&&r.s==='Realizada');
+  const reuR=allR.filter(r=>normTxt(r.m)===normTxt(mes)&&!r._fromOb&&r.s==='Realizada');
   const lbls=['Inbound','Inbound reengajado','Outbound indicação','Outbound'];
   const cols=['#9B72C8','#5DCAA5','#F0C060','#ED93B1'];
   let vals;
@@ -1515,7 +1534,7 @@ function renderOrigR(m){
 // ═══ ORIGEM CONTRATOS ═══
 function renderOrigC(m){
   const mes=D[m].label;
-  const cons=allC.filter(c=>c.m===mes);
+  const cons=allC.filter(c=>normTxt(c.m)===normTxt(mes));
   const lbls=['Inbound','Inbound reengajado','Outbound indicação','Outbound'];
   const cols=['#9B72C8','#5DCAA5','#F0C060','#ED93B1'];
   const vals=lbls.map(l=>cons.filter(c=>c.o===l).length);
@@ -1556,7 +1575,7 @@ function renderPerdas(m){
 // ═══ TABLES: REUNIÕES ═══
 function renderReunioes(m){
   const mes=D[m].label;
-  const rows=allR.map((r,i)=>({...r,_i:i})).filter(r=>r.m===mes);
+  const rows=allR.map((r,i)=>({...r,_i:i})).filter(r=>normTxt(r.m)===normTxt(mes));
   const sb=s=>s==='Realizada'?'bw':s==='Agendada'?'bp':s==='No-show'?'bl':'bf';
   const ob=o=>o==='Inbound'?'bi':o==='Outbound'?'bo':o==='Inbound reengajado'?'br':'by';
   document.getElementById('tb-r').innerHTML=rows.length===0
@@ -1567,7 +1586,7 @@ function renderReunioes(m){
 // ═══ TABLES: CONTRATOS ═══
 function renderContratos(m){
   const mes=D[m].label;
-  const rows=allC.map((c,i)=>({...c,_i:i})).filter(c=>c.m===mes);
+  const rows=allC.map((c,i)=>({...c,_i:i})).filter(c=>normTxt(c.m)===normTxt(mes));
   const ob=o=>o==='Inbound'?'bi':o==='Outbound'?'bo':o==='Inbound reengajado'?'br':'by';
   const tb=t=>t==='Lead do mês'?'bp':'bw';
   document.getElementById('tb-c').innerHTML=rows.length===0
@@ -1580,8 +1599,8 @@ function renderContratos(m){
 function renderComissoes(){
   const months=['Março','Abril','Maio','Junho'];
   const data=months.map(mes=>{
-    const reus=allR.filter(r=>r.m===mes&&r.s==='Realizada');
-    const cons=allC.filter(c=>c.m===mes&&c.fla);
+    const reus=allR.filter(r=>normTxt(r.m)===normTxt(mes)&&r.s==='Realizada');
+    const cons=allC.filter(c=>normTxt(c.m)===normTxt(mes)&&c.fla);
     const reuRows=Object.entries(COMM_REU).map(([orig,rate])=>{const n=reus.filter(r=>r.o===orig).length;return{orig,n,rate,total:n*rate};}).filter(r=>r.n>0);
     const conRows=Object.entries(COMM_CON).map(([orig,rate])=>{const n=cons.filter(c=>c.o===orig).length;return{orig,n,rate,total:n*rate};}).filter(r=>r.n>0);
     const totalReu=reuRows.reduce((s,r)=>s+r.total,0);
@@ -1646,8 +1665,8 @@ function renderComparativo(){
           <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">reuniões</div>
         </div>
         <div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 12px">
-          <div style="font-size:16px;font-weight:700;color:#fff">${pct(d.txConv)}${momBadge(d.txConv*100,prevD?prevD.txConv*100:undefined)}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">tx. conv.</div>
+          <div style="font-size:16px;font-weight:700;color:#fff">${pct(d.txConvMes)}${momBadge(d.txConvMes*100,prevD?prevD.txConvMes*100:undefined)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">tx. conv. (mês)</div>
         </div>
       </div>
     </div>`;
@@ -2111,7 +2130,7 @@ function renderPreCallsTable(m){
   const el=document.getElementById('tb-precall-r');
   if(!el)return;
   const mes=D[m].label;
-  const rows=allPreCalls.map((p,i)=>({...p,_i:i})).filter(p=>p.m===mes);
+  const rows=allPreCalls.map((p,i)=>({...p,_i:i})).filter(p=>normTxt(p.m)===normTxt(mes));
   const sb=s=>s==='Realizada'?'bw':s==='Agendada'?'bp':'bl';
   el.innerHTML=rows.length===0
     ?`<tr><td colspan="5" style="text-align:center;color:var(--txm);padding:20px">Nenhuma pré-call registrada para ${mes}. Clique em + Adicionar.</td></tr>`
@@ -2164,7 +2183,7 @@ function bulkMoveOb(){
   if(from===to){res.textContent='Origem e destino são iguais.';res.style.color='#A32D2D';return;}
   const mesLabel=D[curOb].label;
   let count=0;
-  allOb.forEach(o=>{if(o.mes===mesLabel&&o.status===from){o.status=to;count++;}});
+  allOb.forEach(o=>{if(normTxt(o.mes)===normTxt(mesLabel)&&o.status===from){o.status=to;count++;}});
   if(count===0){res.textContent='Nenhum lead encontrado em "'+from+'" para '+mesLabel+'.';res.style.color='#A32D2D';}
   else{res.textContent=count+' lead(s) movidos para "'+to+'".';res.style.color='var(--mn500)';}
   renderObKanban();syncObToReports();saveState();
@@ -2520,7 +2539,7 @@ function setObM(m){
 
 function renderObKanban(){
   const mesLabel=D[curOb].label;
-  const leads=allOb.map((o,i)=>({...o,_i:i})).filter(o=>o.mes===mesLabel);
+  const leads=allOb.map((o,i)=>({...o,_i:i})).filter(o=>normTxt(o.mes)===normTxt(mesLabel));
   document.getElementById('ob-kanban').innerHTML=OB_STAGES.map(stage=>{
     const cards=leads.filter(l=>l.status===stage.key);
     return`<div class="kb-col" style="background:${stage.color}" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event,'${stage.key}')">
@@ -2637,7 +2656,7 @@ function renderObReportBoard(m){
   const el=document.getElementById('ob-report-board');
   if(!el)return;
   const mesLabel=D[m]?D[m].label:m;
-  const leadsDoMes=allOb.filter(o=>o.mes===mesLabel);
+  const leadsDoMes=allOb.filter(o=>normTxt(o.mes)===normTxt(mesLabel));
   if(leadsDoMes.length===0){
     el.innerHTML=`<div style="font-size:12px;color:var(--txm);text-align:center;padding:20px">Nenhum lead outbound com primeiro contato em ${mesLabel} ainda. Adicione na aba <strong>Outbound</strong>.</div>`;
     return;
@@ -3183,6 +3202,46 @@ function checkMonthlyAnalysisReminder() {
 // BACKUP / RESTORE — exporta e importa todos os dados
 // (NÃO inclui a chave do Gemini, por segurança)
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// LIMPAR DUPLICADOS — remove reuniões/contratos/pré-calls idênticos
+// (mesmo nome + mês normalizado + origem + status), mantendo a 1ª ocorrência
+// ═══════════════════════════════════════════════
+function dedupArray(arr,keyFn){
+  const seen=new Set();
+  const out=[];
+  let removed=0;
+  arr.forEach(item=>{
+    const key=keyFn(item);
+    if(seen.has(key)){removed++;}
+    else{seen.add(key);out.push(item);}
+  });
+  return{out,removed};
+}
+
+function cleanDuplicates(){
+  if(!confirm('Isso vai remover registros duplicados (mesmo nome, mês, origem e status) de Reuniões, Contratos e Pré-Calls, mantendo apenas uma cópia de cada. Deseja continuar?'))return;
+
+  const rResult=dedupArray(allR,r=>`${normTxt(r.n)}|${normTxt(r.m)}|${normTxt(r.o)}|${normTxt(r.s)}|${normTxt(r.f)}`);
+  const cResult=dedupArray(allC,c=>`${normTxt(c.n)}|${normTxt(c.m)}|${normTxt(c.o)}|${normTxt(c.t)}|${normTxt(c.f)}`);
+  const pResult=dedupArray(allPreCalls,p=>`${normTxt(p.n)}|${normTxt(p.m)}|${normTxt(p.o)}|${normTxt(p.s)}`);
+
+  allR=rResult.out;
+  allC=cResult.out;
+  allPreCalls=pResult.out;
+
+  const totalRemoved=rResult.removed+cResult.removed+pResult.removed;
+  const status=document.getElementById('dedup-status');
+  if(totalRemoved===0){
+    status.textContent='✅ Nenhum duplicado encontrado — seus dados já estão limpos.';
+    status.style.color='var(--mn500)';
+  } else {
+    status.textContent=`✅ Removidos: ${rResult.removed} reunião(ões), ${cResult.removed} contrato(s), ${pResult.removed} pré-call(s) duplicado(s).`;
+    status.style.color='#9E4A10';
+    saveState();
+    renderAll(cur);
+  }
+}
+
 function exportBackup(){
   try{
     const mainData = JSON.parse(localStorage.getItem(LS_KEY) || '{}');

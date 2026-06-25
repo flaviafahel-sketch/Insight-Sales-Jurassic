@@ -1318,12 +1318,14 @@ function fmt(n){return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximum
 
 // ═══ KPIs ═══
 function renderKPIs(m){
-  const d=D[m],tot=d.cMes+d.cAntigo;
+  const d=D[m];
+  const live=getLiveMonthData(m);
+  const tot=live.totalContratos;
   document.getElementById('kpig').innerHTML=`
-    <div class="kpi vl"><div class="ki">👥</div><div class="kl">Leads recebidos</div><div class="kv">${d.leads}</div><div class="ks">Pré-call agendadas: ${d.preCallAg}</div></div>
+    <div class="kpi vl"><div class="ki">👥</div><div class="kl">Leads recebidos</div><div class="kv">${d.leads}</div><div class="ks">Pré-call agendadas: ${live.preCallAg}</div></div>
     <div class="kpi vc"><div class="ki">💬</div><div class="kl">Em Follow Up</div><div class="kv">${d.fupWA+d.fupIG+d.fupQuente+d.fupMorno+d.fupFrio}</div><div class="ks">IG: ${d.fupIG} · Q: ${d.fupQuente} · M: ${d.fupMorno} · F: ${d.fupFrio}</div></div>
     <div class="kpi vp"><div class="ki">❌</div><div class="kl">LOST</div><div class="kv">${d.lost}</div><div class="ks">${pct(d.lost/d.leads)} dos leads recebidos</div></div>
-    <div class="kpi vm"><div class="ki">🏆</div><div class="kl">Contratos fechados</div><div class="kv">${tot}</div><div class="ks">${d.cMes} mês · ${d.cAntigo} antigo · tx: ${pct(d.txConv)}</div></div>
+    <div class="kpi vm"><div class="ki">🏆</div><div class="kl">Contratos fechados</div><div class="kv">${tot}</div><div class="ks">${live.cMes} mês · ${live.cAntigo} antigo · tx: ${pct(live.txConvMes)}</div></div>
   `;
 }
 
@@ -1468,19 +1470,14 @@ function renderFunnel1(m){
 
 // ═══ FUNNEL 2 + CONV BREAKDOWN ═══
 function renderFunnel2(m){
-  const d=D[m]; const mes=d.label;
-  // Qualificados = ALL allR entries (any status) for this month
-  const reuAll=allR.filter(r=>normTxt(r.m)===normTxt(mes)&&!r._fromOb);
-  const qual=reuAll.length>0?reuAll.length:d.leadQual;
-  // Reuniões feitas = only Realizada in allR
-  const reunioes=reuAll.length>0?reuAll.filter(r=>r.s==='Realizada').length:d.reunioes;
-  const liveCons=allC.filter(c=>normTxt(c.m)===normTxt(mes));
-  const cMes=liveCons.length>0?liveCons.filter(c=>c.t==='Lead do mês'||c.t==='Lead do mes').length:d.cMes;
-  const cAntigo=liveCons.length>0?liveCons.filter(c=>c.t==='Lead antigo').length:d.cAntigo;
-  const tot=cMes+cAntigo;
-  const txReu=qual>0?reunioes/qual:d.txQualReu;
-  const txCon=reunioes>0?tot/reunioes:d.txReuContratoTotal;
-  const txConvGlobal=d.leads>0?tot/d.leads:d.txConv;
+  const d=D[m];
+  const live=getLiveMonthData(m);
+  const qual=live.leadQual;
+  const reunioes=live.reunioes;
+  const cMes=live.cMes, cAntigo=live.cAntigo, tot=live.totalContratos;
+  const txReu=live.txQualReu;
+  const txCon=live.txReuContratoTotal;
+  const txConvGlobal=live.txConv;
   const steps=[{l:'Qualificados p/ closer',n:qual,bg:'#C8EAE0',fg:'#0F6E4A'},{l:'Reuniões feitas',n:reunioes,bg:'#8DD4B8',fg:'#0F6E4A'},{l:'Contratos fechados',n:tot,bg:'#1D9E75',fg:'#fff'}];
   document.getElementById('funnel2').innerHTML=steps.map(s=>{const w=Math.max(Math.round(s.n/(qual||1)*100),2);
     return `<div class="fs"><div class="fl">${s.l}</div><div class="ft"><div class="fb" style="width:${w}%;background:${s.bg};color:${s.fg}">${s.n}</div></div><div class="fp">${s.n}</div></div>`;
@@ -2805,11 +2802,19 @@ function renderFupComparison(){
 }
 
 function getAllQualLeads(){
-  // Combine: allPreCalls (with q score) + allR (with q score) + pipeline FUP from D + LOST from D
+  // Combine: allPreCalls (com nota) + allR (com nota), deduplicando por lead+mês
+  // Quando o mesmo lead tem nota nas duas fases, mantém só "Reunião Closer" (mais avançado no funil)
   const items=[];
-  allPreCalls.forEach(p=>{if(p.q!==null&&p.q!==undefined)items.push({nome:p.n,mes:p.m,fase:'Pré-call',status:p.s,q:p.q});});
-  allR.filter(r=>!r._fromOb).forEach(r=>{if(r.q!==null&&r.q!==undefined)items.push({nome:r.n,mes:r.m,fase:'Reunião Closer',status:r.s,q:r.q});});
-  return items;
+  allPreCalls.forEach(p=>{if(p.q!==null&&p.q!==undefined)items.push({nome:p.n,mes:p.m,fase:'Pré-call',status:p.s,q:p.q,_ordem:1});});
+  allR.filter(r=>!r._fromOb).forEach(r=>{if(r.q!==null&&r.q!==undefined)items.push({nome:r.n,mes:r.m,fase:'Reunião Closer',status:r.s,q:r.q,_ordem:2});});
+
+  // Agrupa por nome normalizado + mês normalizado; mantém a entrada com maior _ordem (fase mais avançada)
+  const byKey={};
+  items.forEach(item=>{
+    const key=`${normTxt(item.nome)}|${normTxt(item.mes)}`;
+    if(!byKey[key]||item._ordem>byKey[key]._ordem){byKey[key]=item;}
+  });
+  return Object.values(byKey).map(({_ordem,...rest})=>rest);
 }
 
 function renderQualificacao(){
@@ -2947,28 +2952,21 @@ function buildAnalysisPrompt(mKey) {
   const mes = d.label;
   const totalFup = (d.fupWA||0)+(d.fupIG||0)+(d.fupQuente||0)+(d.fupMorno||0)+(d.fupFrio||0);
 
-  // Collect scored leads for this month
+  // Collect scored leads for this month (usa comparação normalizada para evitar bugs de acentuação)
   const mesLabel = d.label;
-  const scoredPrecalls = allPreCalls.filter(p => p.m === mesLabel && p.q !== null && p.q !== undefined);
-  const scoredReus = allR.filter(r => r.m === mesLabel && !r._fromOb && r.q !== null && r.q !== undefined);
+  const scoredPrecalls = allPreCalls.filter(p => normTxt(p.m) === normTxt(mesLabel) && p.q !== null && p.q !== undefined);
+  const scoredReus = allR.filter(r => normTxt(r.m) === normTxt(mesLabel) && !r._fromOb && r.q !== null && r.q !== undefined);
   const avgPCQ = scoredPrecalls.length > 0
     ? (scoredPrecalls.reduce((s, l) => s + l.q, 0) / scoredPrecalls.length).toFixed(2) : 'sem dados';
   const avgRQ = scoredReus.length > 0
     ? (scoredReus.reduce((s, l) => s + l.q, 0) / scoredReus.length).toFixed(2) : 'sem dados';
 
-  // Live funnel numbers
-  const reuAll = allR.filter(r => r.m === mesLabel && !r._fromOb);
-  const qual = reuAll.length > 0 ? reuAll.length : d.leadQual;
-  const reunioes = reuAll.length > 0 ? reuAll.filter(r => r.s === 'Realizada').length : d.reunioes;
-  const cons = allC.filter(c => c.m === mesLabel);
-  const cMes = cons.length > 0 ? cons.filter(c => c.t === 'Lead do mês' || c.t === 'Lead do mes').length : d.cMes;
-  const cAntigo = cons.length > 0 ? cons.filter(c => c.t === 'Lead antigo').length : d.cAntigo;
-  const tot = cMes + cAntigo;
-
-  const pcs = allPreCalls.filter(p => p.m === mesLabel);
-  const ag = pcs.length > 0 ? pcs.length : d.preCallAg;
-  const feitas = pcs.length > 0 ? pcs.filter(p => p.s === 'Realizada').length : d.preCallFeitas;
-  const noshow = pcs.length > 0 ? pcs.filter(p => p.s === 'No-show').length : d.preCallNA;
+  // Live funnel numbers — mesma fonte usada em Reports e Comparativo, garante números idênticos em todo lugar
+  const live = getLiveMonthData(mKey);
+  const qual = live.leadQual;
+  const reunioes = live.reunioes;
+  const cMes = live.cMes, cAntigo = live.cAntigo, tot = live.totalContratos;
+  const ag = live.preCallAg, feitas = live.preCallFeitas, noshow = live.preCallNA;
 
   return `Você é uma analista comercial especializada em vendas B2B para o mercado de eventos. Analise os dados abaixo da SDR Flávia da Jurassic para o mês de ${mes} e gere:
 1. Um resumo executivo do mês (3-4 parágrafos)

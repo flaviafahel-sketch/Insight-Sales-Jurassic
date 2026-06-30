@@ -296,6 +296,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ia-hist-item .ih-date{font-size:11px;color:var(--txm)}
 .ia-hist-item .ih-preview{font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+/* QUAL ORIGIN CARDS (Fase × Origem) */
+.qmx-card{background:#fff;border:1.5px solid var(--bdr);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;transition:box-shadow .15s,border-color .15s,transform .15s;cursor:pointer}
+.qmx-card:active{transform:scale(.98)}
+.qmx-card:hover{box-shadow:0 6px 18px rgba(155,114,200,.15);border-color:var(--lil300)}
+.qmx-card .qmx-name{font-size:12px;font-weight:700;color:var(--tx1);text-align:center;line-height:1.3;min-height:2.6em;display:flex;align-items:center}
+.qmx-card .qmx-total{font-size:22px;font-weight:700;color:var(--lil700)}
+.qmx-card .qmx-total-lbl{font-size:10px;color:var(--txm);text-transform:uppercase;letter-spacing:.05em;margin-top:-8px}
+.qmx-card .qmx-chart-wrap{position:relative;width:120px;height:120px}
+.qmx-card .qmx-toplabel{font-size:10px;color:var(--tx2);text-align:center;line-height:1.5}
+
 /* PRINT / PDF EXPORT */
 @media print{
   .topnav,.mbar,.btn,.btn-s,.btn-add,#pw-gate{display:none!important}
@@ -330,8 +340,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="nav-dd-item" onclick="showPage('comissoes',this)">💸 Comissões</div>
       <div class="nav-dd-item" onclick="showPage('base',this)">📁 Base de Leads</div>
       <div class="nav-dd-item" onclick="showPage('leads',this)">🔍 Leads</div>
-      <div class="nav-dd-item" onclick="showPage('outbound',this)">🎯 Outbound</div>
       <div class="nav-dd-item" onclick="showPage('qualificacao',this)">⭐ Qualificação</div>
+      <div class="nav-dd-item" onclick="showPage('outbound',this)">🎯 Outbound</div>
     </div>
   </div>
   <div class="nav-dd-group">
@@ -644,6 +654,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="MAIO">Maio</option>
         <option value="JUNHO">Junho</option>
       </select>
+      <label style="margin-left:14px">ou por período:</label>
+      <input type="date" id="leads-data-ini" class="filter-select" style="padding:7px 10px" onchange="onPeriodFilterChange()">
+      <span style="font-size:12px;color:var(--txm)">até</span>
+      <input type="date" id="leads-data-fim" class="filter-select" style="padding:7px 10px" onchange="onPeriodFilterChange()">
+      <button onclick="clearPeriodFilter()" style="font-size:11px;color:var(--lil600);background:var(--lil50);border:1.5px solid var(--bdr);border-radius:10px;padding:7px 14px;cursor:pointer">Limpar período</button>
     </div>
 
     <!-- Row 2: fonte top 10 + campanha UTM top 8 -->
@@ -676,6 +691,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="position:relative;height:190px"><canvas id="cLeadsMes" role="img" aria-label="Leads por mês.">Leads por mês.</canvas></div>
     </div>
 
+    <!-- Row 5: Canal + Fonte da sessão (primeira) -->
+    <div class="r2">
+      <div class="card rf">
+        <div class="ct"><span class="dot m"></span>Leads por canal</div>
+        <div id="leads-canal"></div>
+      </div>
+      <div class="card rf">
+        <div class="ct"><span class="dot p"></span>Fonte da sessão (primeira)</div>
+        <div id="leads-fonte-sessao"></div>
+      </div>
+    </div>
+
+    <!-- Row 6: Conteúdo UTM (criativo) top -->
+    <div class="card rf">
+      <div class="ct"><span class="dot y"></span>Leads por conteúdo/criativo UTM (top 8)</div>
+      <p style="font-size:11px;color:var(--txm);margin-bottom:10px">Disponível a partir de Junho/2026 — colunas de origem detalhada passaram a vir preenchidas na planilha a partir desse mês.</p>
+      <div id="leads-conteudo"></div>
+    </div>
+
     <!-- Full leads table with clean dropdown filters -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -689,7 +723,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button onclick="clearAllFilters()" style="font-size:11px;color:var(--lil600);background:var(--lil50);border:1.5px solid var(--bdr);border-radius:10px;padding:7px 14px;cursor:pointer">Limpar filtros</button>
       </div>
       <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>#</th><th>Nome</th><th>Etapa</th><th>Mês</th><th>Data</th><th>Fonte</th><th>Campanha UTM</th><th>Motivo perda</th></tr></thead>
+        <thead><tr><th>#</th><th>Nome</th><th>Etapa</th><th>Mês</th><th>Data</th><th>Fonte</th><th>Canal</th><th>Campanha UTM</th><th>Motivo perda</th></tr></thead>
         <tbody id="tb-leads"></tbody>
       </table></div>
     </div>
@@ -723,6 +757,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="card rf">
     <div class="ct"><span class="dot p"></span>Leads por score — mês selecionado</div>
     <div id="qual-leads-list"></div>
+  </div>
+
+  <div class="slbl">Fases do funil por origem — cards visuais</div>
+  <p style="font-size:11px;color:var(--txm);margin-bottom:14px">Cada card mostra como os leads de uma origem se distribuem entre as fases do funil (Lead Qualificado, Follow Up, LOST, etc.). Filtre por mês ou por um período específico, e escolha a dimensão de origem.</p>
+  <div class="card rf">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div class="ct" style="margin-bottom:0"><span class="dot m"></span>Fase × Origem</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="filter-select" id="qual-matrix-mes" onchange="onQualMatrixMonthChange()">
+          <option value="all">Todos os meses</option>
+          <option value="MARÇO">Março</option>
+          <option value="ABRIL">Abril</option>
+          <option value="MAIO">Maio</option>
+          <option value="JUNHO">Junho</option>
+        </select>
+        <span style="font-size:11px;color:var(--txm)">ou período:</span>
+        <input type="date" id="qual-matrix-data-ini" class="filter-select" style="padding:7px 10px" onchange="onQualMatrixPeriodChange()">
+        <span style="font-size:11px;color:var(--txm)">até</span>
+        <input type="date" id="qual-matrix-data-fim" class="filter-select" style="padding:7px 10px" onchange="onQualMatrixPeriodChange()">
+        <button onclick="clearQualMatrixPeriod()" style="font-size:11px;color:var(--lil600);background:var(--lil50);border:1.5px solid var(--bdr);border-radius:10px;padding:7px 12px;cursor:pointer">Limpar</button>
+        <select class="filter-select" id="qual-matrix-dim" onchange="renderQualMatrix()">
+          <option value="fonte">Fonte</option>
+          <option value="fonteSessao1">Fonte da sessão (primeira)</option>
+          <option value="fonteSessaoUlt">Fonte da sessão (última)</option>
+          <option value="campanha">Campanha UTM</option>
+          <option value="tipoCorrespondenciaUTM">Tipo de correspondência UTM</option>
+          <option value="meio">Meio UTM</option>
+          <option value="idCampanhaUTM">ID da campanha UTM</option>
+          <option value="canal">Canal</option>
+          <option value="palavraChaveUTM">Palavra-chave UTM</option>
+          <option value="idGrupoAnuncioUTM">ID do grupo de anúncios UTM</option>
+          <option value="idAnuncioUTM">ID do anúncio UTM</option>
+          <option value="conteudoUTM">Conteúdo UTM (anúncio)</option>
+          <option value="fonteUTM">Fonte UTM</option>
+        </select>
+      </div>
+    </div>
+    <div id="qual-matrix-legend" class="leg" style="margin-bottom:14px"></div>
+    <div id="qual-matrix-wrap" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
   </div>
 
   <div class="slbl">Follow Up — Qualificação e comparativo mês a mês</div>
@@ -1002,6 +1075,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- MODAL DETALHE DE ORIGEM (Fase × Origem — clique no card) -->
+<div class="mbg" id="modal-qmx-detail">
+  <div class="modal" style="width:640px;max-width:95vw">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <h3 id="qmx-detail-title" style="margin-bottom:0">Detalhe da origem</h3>
+      <button onclick="closeM('qmx-detail')" style="background:none;border:none;font-size:20px;color:var(--txm);cursor:pointer;line-height:1;padding:4px">×</button>
+    </div>
+    <p id="qmx-detail-subtitle" style="font-size:12px;color:var(--txm);margin-bottom:18px"></p>
+    <div style="position:relative;height:280px"><canvas id="qmx-detail-chart" role="img" aria-label="Distribuição de fases detalhada."></canvas></div>
+    <div id="qmx-detail-list" style="margin-top:18px"></div>
+  </div>
+</div>
+
+<!-- MODAL CORREÇÃO MANUAL DE ORIGEM -->
+<div class="mbg" id="modal-origin-correction">
+  <div class="modal" style="width:420px">
+    <h3>✏️ Preencher origem manualmente</h3>
+    <input type="hidden" id="oc-lead-nome-hidden">
+    <input type="hidden" id="oc-lead-mes-hidden">
+    <input type="hidden" id="oc-campo-hidden">
+    <div class="fr">
+      <label>Lead</label>
+      <p id="oc-lead-nome" style="font-size:14px;font-weight:700;color:var(--tx1)"></p>
+    </div>
+    <div class="fr">
+      <label>Mês</label>
+      <p id="oc-lead-mes" style="font-size:13px;color:var(--tx2)"></p>
+    </div>
+    <div class="fr">
+      <label>Campo a preencher: <span id="oc-campo-label" style="color:var(--lil600)"></span></label>
+      <input id="oc-valor" placeholder="Digite a origem que você sabe que é correta...">
+    </div>
+    <p style="font-size:11px;color:var(--txm);margin-bottom:8px">Essa correção fica salva e é reaplicada automaticamente, mesmo se você subir uma planilha nova depois.</p>
+    <div class="mftr">
+      <button class="btn-cancel" onclick="closeM('origin-correction')">Cancelar</button>
+      <button class="btn" onclick="confirmOriginCorrection()">Salvar correção</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ MODALS ══════════ -->
 <div class="mbg" id="modal-precall_r">
   <div class="modal">
@@ -1123,9 +1236,6 @@ Excel.</button></div><div id="r-qual-label" style="font-size:11px;color:var(--tx
 </div>
 
 <script>
-// Escapes HTML special chars to prevent XSS when injecting user data via innerHTML
-function e(s){const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML;}
-
 // ═══ COMMISSION RATES ═══
 const COMM_REU={'Inbound':20,'Inbound reengajado':35,'Outbound indicação':40,'Outbound':50};
 const COMM_CON={'Inbound':35,'Inbound reengajado':55,'Outbound indicação':100,'Outbound':120};
@@ -1253,6 +1363,10 @@ let allR=[],allC=[];
 let cDia=null,cPre=null,cOrigR=null,cOrigC=null,cComp1=null,cComp2=null,cFonteUTM=null,cLeadsMes=null,cQualMes=null;
 let curQualM='mar';
 let uploadedLeads=[];
+// Correções manuais de origem: quando a usuária sabe de onde um lead veio mas a planilha
+// não capturou isso. Persiste entre uploads — reaplicado automaticamente pelo nome do lead
+// (normalizado) sempre que uma planilha nova é processada.
+let originCorrections=[]; // [{nomeNorm, mes, campo, valor}]
 let allPreCalls=[]; // pré-calls tracking (source of truth for funnel1 & cPre)
 let allOb=[]; // outbound leads tracking
 let curOb='mar';
@@ -1398,6 +1512,13 @@ function getLiveReunioesCount(m){
 // ═══ FONTE ÚNICA DE VERDADE: usada tanto pelo Reports quanto pelo Comparativo ═══
 // Garante que os números mostrados em Comparativo sejam SEMPRE idênticos aos do Reports
 // Remove acentos para comparações resilientes a inconsistências de digitação (ex: "Marco" vs "Março")
+// Escapa HTML para prevenir XSS — usar SEMPRE ao exibir texto digitado pelo usuário (nomes, observações, textos livres)
+function escapeHtml(s){
+  const div=document.createElement('div');
+  div.textContent=String(s===null||s===undefined?'':s);
+  return div.innerHTML;
+}
+
 function normTxt(s){
   return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 }
@@ -1580,7 +1701,7 @@ function renderReunioes(m){
   const ob=o=>o==='Inbound'?'bi':o==='Outbound'?'bo':o==='Inbound reengajado'?'br':'by';
   document.getElementById('tb-r').innerHTML=rows.length===0
     ?`<tr><td colspan="6" style="text-align:center;color:var(--txm);padding:24px">Nenhuma reunião para ${mes}.</td></tr>`
-    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${e(r.n)}</td><td style="color:var(--txm)">${e(r.f)||'—'}</td><td><span class="badge ${ob(r.o)}">${e(r.o)}</span></td><td>${e(r.m)}</td><td><span class="badge ${sb(r.s)}">${e(r.s)}</span></td><td style="white-space:nowrap"><button class="btn-s" onclick="editR(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delR(${r._i})">🗑</button></td></tr>`).join('');
+    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${escapeHtml(r.n)}</td><td style="color:var(--txm)">${escapeHtml(r.f)||'—'}</td><td><span class="badge ${ob(r.o)}">${escapeHtml(r.o)}</span></td><td>${escapeHtml(r.m)}</td><td><span class="badge ${sb(r.s)}">${escapeHtml(r.s)}</span></td><td style="white-space:nowrap"><button class="btn-s" onclick="editR(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delR(${r._i})">🗑</button></td></tr>`).join('');
 }
 
 // ═══ TABLES: CONTRATOS ═══
@@ -1591,7 +1712,7 @@ function renderContratos(m){
   const tb=t=>t==='Lead do mês'?'bp':'bw';
   document.getElementById('tb-c').innerHTML=rows.length===0
     ?`<tr><td colspan="7" style="text-align:center;color:var(--txm);padding:24px">Nenhum contrato para ${mes}.</td></tr>`
-    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${e(r.n)}</td><td style="color:var(--txm)">${e(r.f)||'—'}</td><td><span class="badge ${ob(r.o)}">${e(r.o)}</span></td><td>${e(r.m)}</td><td><span class="badge ${tb(r.t)}">${e(r.t)}</span></td><td>${r.fla?'<span class="badge bfla">✨ Sim</span>':'<span style="font-size:11px;color:var(--txm)">Não</span>'}</td><td style="white-space:nowrap"><button class="btn-s" onclick="editC(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delC(${r._i})">🗑</button></td></tr>`).join('');
+    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${escapeHtml(r.n)}</td><td style="color:var(--txm)">${escapeHtml(r.f)||'—'}</td><td><span class="badge ${ob(r.o)}">${escapeHtml(r.o)}</span></td><td>${escapeHtml(r.m)}</td><td><span class="badge ${tb(r.t)}">${escapeHtml(r.t)}</span></td><td>${r.fla?'<span class="badge bfla">✨ Sim</span>':'<span style="font-size:11px;color:var(--txm)">Não</span>'}</td><td style="white-space:nowrap"><button class="btn-s" onclick="editC(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delC(${r._i})">🗑</button></td></tr>`).join('');
   renderOrigC(m);
 }
 
@@ -1776,6 +1897,25 @@ function clearAllFilters(){
   ['filter-fonte-select','filter-meio-select','filter-campanha-select'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='all';});
   renderLeadsAnalytics();
 }
+// Estado do filtro de período — quando ativo, sobrepõe o filtro de mês
+let periodFilterActive=false;
+
+function onPeriodFilterChange(){
+  const ini=document.getElementById('leads-data-ini').value;
+  const fim=document.getElementById('leads-data-fim').value;
+  periodFilterActive=!!(ini||fim);
+  if(periodFilterActive){
+    document.getElementById('leads-mes-filter').value='all'; // período e mês são mutuamente exclusivos
+  }
+  renderLeadsAnalytics();
+}
+function clearPeriodFilter(){
+  document.getElementById('leads-data-ini').value='';
+  document.getElementById('leads-data-fim').value='';
+  periodFilterActive=false;
+  renderLeadsAnalytics();
+}
+
 function renderLeadsAnalytics(){
   if(uploadedLeads.length===0){
     document.getElementById('leads-empty').style.display='block';
@@ -1785,14 +1925,29 @@ function renderLeadsAnalytics(){
   }
   document.getElementById('leads-empty').style.display='none';
   document.getElementById('leads-content').style.display='block';
-  const filter=document.getElementById('leads-mes-filter').value;
-  const leads=filter==='all'?uploadedLeads:uploadedLeads.filter(l=>l.mes===filter);
+
+  let leads;
+  if(periodFilterActive){
+    const iniVal=document.getElementById('leads-data-ini').value;
+    const fimVal=document.getElementById('leads-data-fim').value;
+    const iniTs=iniVal?new Date(iniVal+'T00:00:00').getTime():null;
+    const fimTs=fimVal?new Date(fimVal+'T23:59:59').getTime():null;
+    leads=uploadedLeads.filter(l=>{
+      if(l.dataObj===null||l.dataObj===undefined)return false;
+      if(iniTs!==null&&l.dataObj<iniTs)return false;
+      if(fimTs!==null&&l.dataObj>fimTs)return false;
+      return true;
+    });
+  } else {
+    const filter=document.getElementById('leads-mes-filter').value;
+    leads=filter==='all'?uploadedLeads:uploadedLeads.filter(l=>l.mes===filter);
+  }
   document.getElementById('hero-total').textContent=leads.length;
 
   // Helper: count and bar
   function makeBarList(items,colorBase){
     const mx=items[0]?.[1]||1;
-    return items.map(([k,n])=>`<div class="pi"><div class="pl" title="${k}">${k||'(vazio)'}</div><div class="pt" style="width:100px"><div class="pf" style="width:${Math.round(n/mx*100)}%;background:${colorBase}"></div></div><div class="pn">${n}</div></div>`).join('');
+    return items.map(([k,n])=>`<div class="pi"><div class="pl" title="${escapeHtml(k)}">${escapeHtml(k)||'(vazio)'}</div><div class="pt" style="width:100px"><div class="pf" style="width:${Math.round(n/mx*100)}%;background:${colorBase}"></div></div><div class="pn">${n}</div></div>`).join('');
   }
   function countField(arr,key,top=10){
     const c={};arr.forEach(l=>{const v=String(l[key]||'').trim();if(v)c[v]=(c[v]||0)+1;});
@@ -1800,33 +1955,39 @@ function renderLeadsAnalytics(){
   }
 
   // Fonte simplificada (top 10)
-  const fonteSimp=leads.map(l=>{
-    const f=String(l.fonte||'').trim();
-    if(/ebook|e-book/i.test(f))return'Ebook';
-    if(/Cadastros Jurassic/i.test(f))return'Cadastros Jurassic - NOVA LP';
-    if(/AD |Dark Post/i.test(f))return'Anúncio (Meta Ads)';
-    if(/quizz/i.test(f))return'Quizz';
-    if(/calculadora/i.test(f))return'Calculadora';
-    return f.slice(0,40)||'(sem fonte)';
-  });
-  const fSimp={}; fonteSimp.forEach(v=>{fSimp[v]=(fSimp[v]||0)+1;});
+  const fonteSimp=leads.map(l=>simpFonte(l.fonte));
+  const fSimp={}; fonteSimp.forEach(v=>{if(v&&v!=='(sem fonte)')fSimp[v]=(fSimp[v]||0)+1;});
   const fonteTop=Object.entries(fSimp).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  document.getElementById('leads-fontes').innerHTML=makeBarList(fonteTop,'#ED93B1');
+  document.getElementById('leads-fontes').innerHTML=fonteTop.length?makeBarList(fonteTop,'#ED93B1'):'<div style="font-size:12px;color:var(--txm)">Sem dados para este filtro.</div>';
 
   // Campanha UTM top 8
   const campTop=countField(leads,'campanha',8).map(([k,n])=>[k.slice(0,52),n]);
-  document.getElementById('leads-campanhas').innerHTML=makeBarList(campTop,'#1D9E75');
+  document.getElementById('leads-campanhas').innerHTML=campTop.length?makeBarList(campTop,'#1D9E75'):'<div style="font-size:12px;color:var(--txm)">Sem dados para este filtro.</div>';
 
   // Meio UTM top 8
   const meioTop=countField(leads,'meio',8).map(([k,n])=>[k.slice(0,48),n]);
-  document.getElementById('leads-meios').innerHTML=makeBarList(meioTop,'#F0C060');
+  document.getElementById('leads-meios').innerHTML=meioTop.length?makeBarList(meioTop,'#F0C060'):'<div style="font-size:12px;color:var(--txm)">Sem dados para este filtro.</div>';
 
   // Fonte UTM donut
   const fonteUTMCount=countField(leads,'fonteUTM',6);
   if(cFonteUTM){cFonteUTM.destroy();cFonteUTM=null;}
-  cFonteUTM=new Chart(document.getElementById('cFonteUTM'),{type:'doughnut',
-    data:{labels:fonteUTMCount.map(f=>f[0]||'(sem UTM)'),datasets:[{data:fonteUTMCount.map(f=>f[1]),backgroundColor:['#9B72C8','#ED93B1','#5DCAA5','#F0C060','#A87DD8','#6BAED4'],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}}}}});
+  if(fonteUTMCount.length>0){
+    cFonteUTM=new Chart(document.getElementById('cFonteUTM'),{type:'doughnut',
+      data:{labels:fonteUTMCount.map(f=>f[0]||'(sem UTM)'),datasets:[{data:fonteUTMCount.map(f=>f[1]),backgroundColor:['#9B72C8','#ED93B1','#5DCAA5','#F0C060','#A87DD8','#6BAED4'],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}}}}});
+  }
+
+  // Canal (top 8)
+  const canalTop=countField(leads,'canal',8);
+  document.getElementById('leads-canal').innerHTML=canalTop.length?makeBarList(canalTop,'#5DCAA5'):'<div style="font-size:12px;color:var(--txm)">Sem dados de canal para este filtro (disponível a partir de Junho/2026).</div>';
+
+  // Fonte da sessão (primeira) (top 8)
+  const fonteSessaoTop=countField(leads,'fonteSessao1',8);
+  document.getElementById('leads-fonte-sessao').innerHTML=fonteSessaoTop.length?makeBarList(fonteSessaoTop,'#9B72C8'):'<div style="font-size:12px;color:var(--txm)">Sem dados de fonte de sessão para este filtro (disponível a partir de Junho/2026).</div>';
+
+  // Conteúdo/Criativo UTM (top 8)
+  const conteudoTop=countField(leads,'conteudoUTM',8).map(([k,n])=>[k.slice(0,52),n]);
+  document.getElementById('leads-conteudo').innerHTML=conteudoTop.length?makeBarList(conteudoTop,'#F0997B'):'<div style="font-size:12px;color:var(--txm)">Sem dados de conteúdo UTM para este filtro (disponível a partir de Junho/2026).</div>';
 
   // Leads por mês bar (always all months regardless of filter)
   const mesCounts={'MARÇO':0,'ABRIL':0,'MAIO':0,'JUNHO':0};
@@ -1847,9 +2008,9 @@ function renderLeadsAnalytics(){
   const campSel=document.getElementById('filter-campanha-select');
   const curFonte=fonteSel.value, curMeio=meioSel.value, curCamp=campSel.value;
 
-  fonteSel.innerHTML=`<option value="all">Todas as fontes</option>`+allFontesSimp.map(v=>`<option value="${v}" ${v===curFonte?'selected':''}>${v.slice(0,40)}</option>`).join('');
-  meioSel.innerHTML=`<option value="all">Todos os meios UTM</option>`+allMeios.map(v=>`<option value="${v}" ${v===curMeio?'selected':''}>${v.slice(0,40)}</option>`).join('');
-  campSel.innerHTML=`<option value="all">Todas as campanhas</option>`+allCamps.map(v=>`<option value="${v}" ${v===curCamp?'selected':''}>${v.slice(0,48)}</option>`).join('');
+  fonteSel.innerHTML=`<option value="all">Todas as fontes</option>`+allFontesSimp.map(v=>`<option value="${escapeHtml(v)}" ${v===curFonte?'selected':''}>${escapeHtml(v.slice(0,40))}</option>`).join('');
+  meioSel.innerHTML=`<option value="all">Todos os meios UTM</option>`+allMeios.map(v=>`<option value="${escapeHtml(v)}" ${v===curMeio?'selected':''}>${escapeHtml(v.slice(0,40))}</option>`).join('');
+  campSel.innerHTML=`<option value="all">Todas as campanhas</option>`+allCamps.map(v=>`<option value="${escapeHtml(v)}" ${v===curCamp?'selected':''}>${escapeHtml(v.slice(0,48))}</option>`).join('');
 
   // Apply filters to table
   let tableLeads=leads;
@@ -1860,16 +2021,17 @@ function renderLeadsAnalytics(){
   const sample=tableLeads.slice(0,150);
   document.getElementById('leads-count').textContent=`Exibindo ${sample.length} de ${tableLeads.length} leads`;
 
-  const badgeE=et=>et.includes('GANHO')?'bw':et==='LOST'?'bl':/FUP|Follow/i.test(et)?'bf':/Erro/i.test(et)?'bl':'bp';
+  const badgeE=e=>e.includes('GANHO')?'bw':e==='LOST'?'bl':/FUP|Follow/i.test(e)?'bf':/Erro/i.test(e)?'bl':'bp';
   document.getElementById('tb-leads').innerHTML=sample.map((l,i)=>`<tr>
     <td style="color:var(--txm)">${i+1}</td>
-    <td style="font-weight:600;color:var(--tx1)">${e(l.nome.slice(0,35))}</td>
-    <td><span class="badge ${badgeE(l.etapa)}">${e(l.etapa.slice(0,26))}</span></td>
-    <td style="color:var(--txm)">${e(l.mes)}</td>
-    <td style="color:var(--txm)">${e(l.data)}</td>
-    <td style="color:var(--txm)">${e((l.fonte||'').slice(0,24))||'—'}</td>
-    <td style="color:var(--txm);font-size:11px">${e((l.campanha||'').slice(0,38))||'—'}</td>
-    <td style="color:var(--txm)">${e((l.motivo||'').slice(0,30))||'—'}</td>
+    <td style="font-weight:600;color:var(--tx1)">${escapeHtml(l.nome.slice(0,35))}</td>
+    <td><span class="badge ${badgeE(l.etapa)}">${escapeHtml(l.etapa.slice(0,26))}</span></td>
+    <td style="color:var(--txm)">${escapeHtml(l.mes)}</td>
+    <td style="color:var(--txm)">${escapeHtml(l.data)}</td>
+    <td style="color:var(--txm)">${escapeHtml((l.fonte||'').slice(0,24))||'—'}</td>
+    <td style="color:var(--txm);font-size:11px">${escapeHtml((l.canal||'').slice(0,18))||'—'}</td>
+    <td style="color:var(--txm);font-size:11px">${escapeHtml((l.campanha||'').slice(0,38))||'—'}</td>
+    <td style="color:var(--txm)">${escapeHtml((l.motivo||'').slice(0,30))||'—'}</td>
   </tr>`).join('');
 }
 
@@ -1908,7 +2070,7 @@ function renderTaskGroup(group,elId,arr){
   el.innerHTML=arr.map((t,i)=>`
     <div class="task-item ${t.done?'done':''}">
       <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${group}',${i})">${t.done?'✓':''}</div>
-      <div class="task-text">${e(t.text)}</div>
+      <div class="task-text">${escapeHtml(t.text)}</div>
       <button class="btn-s del" style="padding:3px 8px;font-size:10px" onclick="delTask('${group}',${i})">🗑</button>
     </div>`).join('');
 }
@@ -1924,7 +2086,7 @@ function renderTaskGroupHoje(){
     html=visibleToday.map(t=>`
       <div class="task-item ${t.done?'done':''}">
         <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('hoje',${t._i})">${t.done?'✓':''}</div>
-        <div class="task-text">${e(t.text)}</div>
+        <div class="task-text">${escapeHtml(t.text)}</div>
         <button class="btn-s del" style="padding:3px 8px;font-size:10px" onclick="delTask('hoje',${t._i})">🗑</button>
       </div>`).join('');
     if(scheduled.length>0){
@@ -1932,7 +2094,7 @@ function renderTaskGroupHoje(){
       scheduled.map(t=>`
         <div class="task-item" style="opacity:.7">
           <div class="task-check" style="border-color:var(--txm)"></div>
-          <div class="task-text">${e(t.text)} <span style="font-size:10px;color:var(--lil600);font-weight:600">· ${formatDatePtBr(t.date)}</span></div>
+          <div class="task-text">${escapeHtml(t.text)} <span style="font-size:10px;color:var(--lil600);font-weight:600">· ${formatDatePtBr(t.date)}</span></div>
           <button class="btn-s del" style="padding:3px 8px;font-size:10px" onclick="delTask('hoje',${t._i})">🗑</button>
         </div>`).join('');
     }
@@ -1979,9 +2141,9 @@ function renderProjList(){
   const statusColor={'Ideia':'by','Planejando':'bp','Em andamento':'bf','Concluído':'bw','Pausado':'bl'};
   el.innerHTML=allProj.map((p,i)=>`
     <div class="proj-card">
-      <div class="pc-title">${e(p.nome)}</div>
-      <span class="badge ${statusColor[p.status]||'bp'}" style="margin-bottom:8px;display:inline-block">${e(p.status)}</span>
-      <div class="pc-desc">${e(p.desc||'')}</div>
+      <div class="pc-title">${escapeHtml(p.nome)}</div>
+      <span class="badge ${statusColor[p.status]||'bp'}" style="margin-bottom:8px;display:inline-block">${p.status}</span>
+      <div class="pc-desc">${escapeHtml(p.desc)}</div>
       <div style="display:flex;gap:6px;margin-top:10px">
         <button class="btn-s" onclick="editProj(${i})">✏️ Editar</button>
         <button class="btn-s del" onclick="delProj(${i})">🗑</button>
@@ -2035,11 +2197,11 @@ function renderPrecallPage(){
     <div class="acc-item">
       <div class="acc-header" onclick="toggleAcc(this)">
         <span class="acc-tipo" style="background:${l.tipo==='qual'?'var(--mn100)':'#FFF0F0'};color:${l.tipo==='qual'?'var(--mn700)':'#A32D2D'}">${l.tipo==='qual'?'✅ Qualificado':'🚫 Desqualificado'}</span>
-        <span class="acc-name">${e(l.nome)}</span>
+        <span class="acc-name">${escapeHtml(l.nome)}</span>
         <span class="acc-chevron">▼</span>
       </div>
       <div class="acc-body">
-        <div class="acc-text">${e(l.texto||'Sem detalhes.')}</div>
+        <div class="acc-text">${escapeHtml(l.texto)||'Sem detalhes.'}</div>
         <div class="acc-actions">
           <button class="btn-s" onclick="editLeadDetail(${l._i})">✏️ Editar</button>
           <button class="btn-s del" onclick="delLeadDetail(${l._i})">🗑</button>
@@ -2086,11 +2248,11 @@ function renderCadencias(){
   el.innerHTML=allCad.map((c,i)=>`
     <div class="acc-item">
       <div class="acc-header" onclick="toggleAcc(this)">
-        <span class="acc-name">✉️ ${e(c.nome)}</span>
+        <span class="acc-name">✉️ ${escapeHtml(c.nome)}</span>
         <span class="acc-chevron">▼</span>
       </div>
       <div class="acc-body">
-        <div class="acc-text">${e(c.texto)}</div>
+        <div class="acc-text">${escapeHtml(c.texto)}</div>
         <div class="acc-actions">
           <button class="btn-s" onclick="editCad(${i})">✏️ Editar</button>
           <button class="btn-s del" onclick="delCad(${i})">🗑</button>
@@ -2135,10 +2297,10 @@ function renderPreCallsTable(m){
   el.innerHTML=rows.length===0
     ?`<tr><td colspan="5" style="text-align:center;color:var(--txm);padding:20px">Nenhuma pré-call registrada para ${mes}. Clique em + Adicionar.</td></tr>`
     :rows.map(r=>`<tr>
-        <td style="font-weight:600;color:var(--tx1)">${e(r.n)}</td>
-        <td><span class="badge ${r.o==='Inbound'?'bi':r.o==='Outbound'?'bo':r.o==='Inbound reengajado'?'br':'by'}">${e(r.o)}</span></td>
-        <td>${e(r.m)}</td>
-        <td><span class="badge ${sb(r.s)}">${e(r.s)}</span></td>
+        <td style="font-weight:600;color:var(--tx1)">${escapeHtml(r.n)}</td>
+        <td><span class="badge ${r.o==='Inbound'?'bi':r.o==='Outbound'?'bo':r.o==='Inbound reengajado'?'br':'by'}">${r.o}</span></td>
+        <td>${r.m}</td>
+        <td><span class="badge ${sb(r.s)}">${r.s}</span></td>
         <td style="white-space:nowrap">
           <button class="btn-s" onclick="editPCR(${r._i})" style="margin-right:4px">✏️</button>
           <button class="btn-s del" onclick="delPCR(${r._i})">🗑</button>
@@ -2267,13 +2429,105 @@ function handleFile(event){
   reader.readAsArrayBuffer(file);
 }
 
+// Mapeia os nomes de coluna da planilha (header row) para índices, incluindo as colunas
+// de origem/UTM avançadas que passaram a vir preenchidas a partir de Junho/2026.
+function buildColumnIndex(H){
+  return{
+    nome:H.findIndex(h=>h.includes('Nome de Oportunidade')||h.includes('Nome')),
+    etapa:H.findIndex(h=>h.includes('Etapa')),
+    data:H.findIndex(h=>h.includes('Criado')||h.includes('Data')),
+    motivo:H.findIndex(h=>h.includes('Motivo')),
+    fonteUTM:H.findIndex(h=>h.includes('Fonte UTM')),
+    meio:H.findIndex(h=>h.includes('Meio UTM')),
+    campanha:H.findIndex(h=>h.includes('Campanha UTM')),
+    fonte:H.findIndex(h=>h==='Fonte'),
+    fonteSessao1:H.findIndex(h=>h.includes('Fonte da sessão (Primeira')||h.includes('Fonte da sessao (Primeira')),
+    fonteSessaoUlt:H.findIndex(h=>h.includes('Fonte da sessão (Última')||h.includes('Fonte da sessao (Ultima')),
+    idCampanhaUTM:H.findIndex(h=>h.includes('ID da campanha UTM')),
+    canal:H.findIndex(h=>h.includes('Canal')),
+    palavraChaveUTM:H.findIndex(h=>h.includes('Palavra-chave UTM')||h.includes('Palavra-chave')),
+    idGrupoAnuncioUTM:H.findIndex(h=>h.includes('ID do grupo de anúncios UTM')||h.includes('ID do grupo de anuncios UTM')),
+    idAnuncioUTM:H.findIndex(h=>h.includes('ID do anúncio UTM')||h.includes('ID do anuncio UTM')),
+    conteudoUTM:H.findIndex(h=>h.includes('Conteúdo UTM')||h.includes('Conteudo UTM')),
+    tipoCorrespondenciaUTM:H.findIndex(h=>h.includes('Tipo de correspondência UTM')||h.includes('Tipo de correspondencia UTM')),
+  };
+}
+
+// Monta um registro de lead a partir de uma linha bruta da planilha + o índice de colunas.
+// Guarda a data em dois formatos: 'data' (string pt-BR, para exibição) e 'dataObj' (timestamp
+// numérico, para permitir filtro por período sem precisar reconverter strings toda hora).
+function buildLeadRecord(r,ci,mes){
+  const dv=r[ci.data];
+  let ds='',dataObj=null;
+  if(dv instanceof Date){ds=dv.toLocaleDateString('pt-BR');dataObj=dv.getTime();}
+  else if(dv){
+    ds=String(dv).split('T')[0];
+    const parsed=new Date(dv);
+    if(!isNaN(parsed.getTime()))dataObj=parsed.getTime();
+  }
+  const g=(idx)=>idx>=0?String(r[idx]||'').trim():'';
+  return{
+    nome:g(ci.nome),
+    etapa:g(ci.etapa),
+    data:ds,
+    dataObj,
+    motivo:g(ci.motivo),
+    fonteUTM:g(ci.fonteUTM),
+    meio:g(ci.meio),
+    campanha:g(ci.campanha),
+    fonte:g(ci.fonte),
+    fonteSessao1:g(ci.fonteSessao1),
+    fonteSessaoUlt:g(ci.fonteSessaoUlt),
+    idCampanhaUTM:g(ci.idCampanhaUTM),
+    canal:g(ci.canal),
+    palavraChaveUTM:g(ci.palavraChaveUTM),
+    idGrupoAnuncioUTM:g(ci.idGrupoAnuncioUTM),
+    idAnuncioUTM:g(ci.idAnuncioUTM),
+    conteudoUTM:g(ci.conteudoUTM),
+    tipoCorrespondenciaUTM:g(ci.tipoCorrespondenciaUTM),
+    mes,
+  };
+}
+
+// ═══════════════════════════════════════════════
+// CORREÇÕES MANUAIS DE ORIGEM
+// Permite preencher a origem de um lead quando a planilha veio sem essa informação,
+// mas a usuária sabe de onde ele veio. Persiste entre uploads de planilha (salvo junto
+// com o resto do estado), e é reaplicado automaticamente sempre que uma nova planilha
+// é processada, cruzando pelo nome do lead (normalizado) + mês.
+// ═══════════════════════════════════════════════
+function applyOriginCorrections(){
+  if(originCorrections.length===0)return;
+  uploadedLeads.forEach(l=>{
+    const nomeNorm=normTxt(l.nome);
+    const mesNorm=normTxt(l.mes);
+    originCorrections.forEach(c=>{
+      if(c.nomeNorm===nomeNorm&&normTxt(c.mes)===mesNorm){
+        l[c.campo]=c.valor;
+      }
+    });
+  });
+}
+
+// Salva (ou atualiza) uma correção manual de origem para um lead específico e a reaplica
+// imediatamente nos dados já carregados, sem precisar subir a planilha de novo.
+function saveOriginCorrection(nome,mes,campo,valor){
+  const nomeNorm=normTxt(nome);
+  const mesNorm=normTxt(mes);
+  const existing=originCorrections.find(c=>c.nomeNorm===nomeNorm&&normTxt(c.mes)===mesNorm&&c.campo===campo);
+  if(existing){existing.valor=valor;}
+  else{originCorrections.push({nomeNorm,mes,campo,valor});}
+  applyOriginCorrections();
+  saveState();
+}
+
 function processBase(raw,fname){
   // Find month boundaries and header row
-  // Expected: row 0 = month name, row 1 = headers, rows 2+ = data
-  const MONTH_NAMES=['MARÇO','ABRIL','MAIO','JUNHO'];
+  // Expected: row 0 = month name, row 1 = headers (only repeated for the FIRST block), rows 2+ = data
+  const MONTH_NAMES=['MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
   const monthBounds=[];
   for(let i=0;i<raw.length;i++){
-    const v=String(raw[i][0]||'').trim();
+    const v=String(raw[i][0]||'').trim().toUpperCase();
     if(MONTH_NAMES.includes(v))monthBounds.push({mes:v,start:i});
   }
 
@@ -2284,33 +2538,31 @@ function processBase(raw,fname){
     for(let i=0;i<Math.min(raw.length,5);i++){if(raw[i]&&raw[i].some(c=>String(c).includes('Etapa'))){hrow=i;break;}}
     if(hrow<0)hrow=0;
     const H=raw[hrow].map(h=>String(h).trim());
-    const ci={nome:H.findIndex(h=>h.includes('Nome de Oportunidade')||h.includes('Nome')),etapa:H.findIndex(h=>h.includes('Etapa')),data:H.findIndex(h=>h.includes('Criado')||h.includes('Data')),motivo:H.findIndex(h=>h.includes('Motivo')),fonteUTM:H.findIndex(h=>h.includes('Fonte UTM')),meio:H.findIndex(h=>h.includes('Meio')),campanha:H.findIndex(h=>h.includes('Campanha')),fonte:H.findIndex(h=>h==='Fonte'||h.includes('Fonte')&&!h.includes('UTM'))};
+    const ci=buildColumnIndex(H);
     raw.slice(hrow+1).forEach(r=>{
       if(!r[ci.nome]||String(r[ci.nome]).trim()==='')return;
-      const dv=r[ci.data];let ds='';
-      if(dv instanceof Date)ds=dv.toLocaleDateString('pt-BR');else if(dv)ds=String(dv).split('T')[0];
-      uploadedLeads.push({nome:String(r[ci.nome]||''),etapa:String(r[ci.etapa]||'').trim(),data:ds,motivo:String(r[ci.motivo]||''),fonteUTM:String(r[ci.fonteUTM]||''),meio:String(r[ci.meio]||''),campanha:String(r[ci.campanha]||''),fonte:String(r[ci.fonte]||''),mes:'—'});
+      uploadedLeads.push(buildLeadRecord(r,ci,'—'));
     });
   } else {
-    // Multi-month format: row 0=month, row 1=headers, rows 2+=data
-    // headers from first block
+    // Multi-month format: row 0=month, row 1=headers (only present right after the FIRST marker), rows 2+=data
     const H=raw[1].map(h=>String(h).trim());
-    const ci={nome:H.findIndex(h=>h.includes('Nome de Oportunidade')||h.includes('Nome')),etapa:H.findIndex(h=>h.includes('Etapa')),data:H.findIndex(h=>h.includes('Criado')||h.includes('Data')),motivo:H.findIndex(h=>h.includes('Motivo')),fonteUTM:H.findIndex(h=>h.includes('Fonte UTM')),meio:H.findIndex(h=>h.includes('Meio UTM')),campanha:H.findIndex(h=>h.includes('Campanha')),fonte:H.findIndex(h=>h==='Fonte')};
+    const ci=buildColumnIndex(H);
     for(let mi=0;mi<monthBounds.length;mi++){
       const mes=monthBounds[mi].mes;
-      const dataStart=monthBounds[mi].start+2;
+      // Only the first block (mi===0) has its own header row right after the marker; all other
+      // blocks go straight from "marker row" to "data row" with no repeated header in between.
+      const dataStart=mi===0?monthBounds[mi].start+2:monthBounds[mi].start+1;
       const dataEnd=mi+1<monthBounds.length?monthBounds[mi+1].start:raw.length;
       for(let ri=dataStart;ri<dataEnd;ri++){
         const r=raw[ri];
         if(!r||!r[ci.nome]||String(r[ci.nome]).trim()==='')continue;
-        const dv=r[ci.data];let ds='';
-        if(dv instanceof Date)ds=dv.toLocaleDateString('pt-BR');else if(dv)ds=String(dv).split('T')[0];
-        uploadedLeads.push({nome:String(r[ci.nome]||'').trim(),etapa:String(r[ci.etapa]||'').trim(),data:ds,motivo:String(r[ci.motivo]||''),fonteUTM:String(r[ci.fonteUTM]||''),meio:String(r[ci.meio]||''),campanha:String(r[ci.campanha]||''),fonte:String(r[ci.fonte]||''),mes});
+        uploadedLeads.push(buildLeadRecord(r,ci,mes));
       }
     }
   }
 
   // Show preview in BASE tab
+  applyOriginCorrections(); // reaplica correções manuais salvas antes de qualquer renderização
   document.getElementById('base-preview').style.display='block';
   const lost=uploadedLeads.filter(l=>l.etapa==='LOST').length;
   const fup=uploadedLeads.filter(l=>/FUP|Follow Up/i.test(l.etapa)).length;
@@ -2321,17 +2573,17 @@ function processBase(raw,fname){
   `;
   const etapas={};uploadedLeads.forEach(l=>{if(l.etapa)etapas[l.etapa]=(etapas[l.etapa]||0)+1;});
   const mx=Math.max(...Object.values(etapas),1);
-  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([et,n])=>`
-    <div class="pi"><div class="pl" title="${e(et)}">${e(et)}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
+  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([e,n])=>`
+    <div class="pi"><div class="pl" title="${escapeHtml(e)}">${escapeHtml(e)}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
   const sample=uploadedLeads.slice(0,30);
-  const badgeE=et=>et.includes('GANHO')?'bw':et==='LOST'?'bl':/Follow|FUP/i.test(et)?'bf':'bp';
+  const badgeE=e=>e.includes('GANHO')?'bw':e==='LOST'?'bl':/Follow|FUP/i.test(e)?'bf':'bp';
   document.getElementById('tb-base').innerHTML=sample.map((l,i)=>`<tr>
     <td style="color:var(--txm)">${i+1}</td>
-    <td style="font-weight:600;color:var(--tx1)">${e(l.nome.slice(0,35))}</td>
-    <td><span class="badge ${badgeE(l.etapa)}">${e(l.etapa.slice(0,28))}</span></td>
-    <td>${e(l.data)}</td>
-    <td style="color:var(--txm)">${e(l.motivo.slice(0,30))||'—'}</td>
-    <td style="color:var(--txm)">${e(l.fonte.slice(0,20))||'—'}</td>
+    <td style="font-weight:600;color:var(--tx1)">${escapeHtml(l.nome.slice(0,35))}</td>
+    <td><span class="badge ${badgeE(l.etapa)}">${escapeHtml(l.etapa.slice(0,28))}</span></td>
+    <td>${escapeHtml(l.data)}</td>
+    <td style="color:var(--txm)">${escapeHtml(l.motivo.slice(0,30))||'—'}</td>
+    <td style="color:var(--txm)">${escapeHtml(l.fonte.slice(0,20))||'—'}</td>
   </tr>`).join('');
 
   // ── Auto-generate / update month pages in Reports from this BASE upload ──
@@ -2547,8 +2799,8 @@ function renderObKanban(){
       <div class="kb-cards">
         ${cards.length===0?'<div class="kb-empty">Arraste um lead aqui</div>':cards.map(c=>`
           <div class="kb-card" draggable="true" ondragstart="obDragStart(event,${c._i})" ondragend="obDragEnd(event)">
-            <div class="kbc-name">${e(c.nome)}</div>
-            <div class="kbc-fonte">${e(c.fonte||'—')}</div>
+            <div class="kbc-name">${escapeHtml(c.nome)}</div>
+            <div class="kbc-fonte">${c.fonte||'—'}</div>
             <div style="display:flex;gap:4px;margin-top:6px">
               <button class="btn-s" onclick="editOb(${c._i})" style="padding:3px 8px;font-size:10px">✏️</button>
               <button class="btn-s del" onclick="delOb(${c._i})" style="padding:3px 8px;font-size:10px">🗑</button>
@@ -2817,7 +3069,29 @@ function getAllQualLeads(){
     const key=`${normTxt(item.nome)}|${normTxt(item.mes)}`;
     if(!byKey[key]||item._ordem>byKey[key]._ordem){byKey[key]=item;}
   });
-  return Object.values(byKey).map(({_ordem,...rest})=>rest);
+  const result=Object.values(byKey).map(({_ordem,...rest})=>rest);
+
+  // Enriquece com fonte/campanha cruzando pelo nome (normalizado) no upload da Base de Leads.
+  // Como o nome pode vir formatado de forma levemente diferente entre Reuniões/Pré-Calls e a
+  // planilha, usamos correspondência por substring normalizada além da igualdade exata.
+  if(uploadedLeads.length>0){
+    const byName={};
+    uploadedLeads.forEach(l=>{const key=normTxt(l.nome);if(key)byName[key]=l;});
+    result.forEach(item=>{
+      const key=normTxt(item.nome);
+      let match=byName[key];
+      if(!match){
+        // tenta correspondência parcial (um nome contém o outro) para casos com apelidos/eventos no nome
+        const found=uploadedLeads.find(l=>{
+          const lk=normTxt(l.nome);
+          return lk&&(lk.includes(key)||key.includes(lk));
+        });
+        if(found)match=found;
+      }
+      if(match){item.fonte=simpFonte(match.fonte);item.campanha=match.campanha||'';}
+    });
+  }
+  return result;
 }
 
 function renderQualificacao(){
@@ -2853,63 +3127,254 @@ function renderQualificacao(){
 
   renderQualMonthDetail(curQualM);
   renderFupComparison();
+  renderQualMatrix();
 }
 
-function renderFupComparison(){
-  const meses=Object.keys(D).filter(k=>MONTH_ORDER.includes(k)).sort((a,b)=>MONTH_ORDER.indexOf(a)-MONTH_ORDER.indexOf(b));
-  const lbls=meses.map(m=>D[m].label);
+// Agrupa as fases (etapas) reais da planilha em categorias macro legíveis para a matriz.
+// Mantém fidelidade aos dados: cada etapa real cai em exatamente um grupo.
+const QUAL_PHASE_GROUPS=[
+  {key:'qualificado', label:'Qualificado p/ Closer', color:'#1D9E75', match:e=>/Lead Qualificado/i.test(e)},
+  {key:'reuniao',     label:'Reunião (a realizar/feita)', color:'#5DCAA5', match:e=>/Reunião a realizar|No Show Closer|No show/i.test(e)},
+  {key:'ganho',       label:'Contrato Fechado', color:'#0F6E4A', match:e=>/GANHO/i.test(e)},
+  {key:'precall',     label:'Pré-call (agendada/reagendar)', color:'#9B72C8', match:e=>/Pré-?call Agendada|Reagendar/i.test(e)},
+  {key:'proposta',    label:'Proposta enviada', color:'#A87DD8', match:e=>/Proposta enviada/i.test(e)},
+  {key:'fup_quente',  label:'FUP — Lead Quente', color:'#E8734A', match:e=>/Lead Quente/i.test(e)},
+  {key:'fup_morno',   label:'FUP — Lead Morno', color:'#F0C060', match:e=>/Lead Morno/i.test(e)},
+  {key:'fup_frio',    label:'FUP — Lead Frio', color:'#6BAED4', match:e=>/Lead Frio/i.test(e)},
+  {key:'fup_outros',  label:'Follow Up (Insta/WhatsApp/Sucesso)', color:'#ED93B1', match:e=>/Follow Up Instagram|Follow Up WhatsApp|FUP Sucesso/i.test(e)},
+  {key:'erro_fup',    label:'Erro Follow Up', color:'#B0A0C0', match:e=>/ERRO FOLLOW UP/i.test(e)},
+  {key:'novos',       label:'Novos Leads', color:'#C4A3E8', match:e=>/Novos Leads/i.test(e)},
+  {key:'lost',        label:'LOST', color:'#D4537E', match:e=>/^LOST$|momento inadequado/i.test(e)},
+];
+function qualPhaseGroupOf(etapa){
+  const g=QUAL_PHASE_GROUPS.find(g=>g.match(etapa));
+  return g?g.key:'outros';
+}
 
-  // Grouped bar: quente / morno / frio / IG per month
-  if(cFupComp){cFupComp.destroy();cFupComp=null;}
-  cFupComp=new Chart(document.getElementById('cFupComp'),{type:'bar',
-    data:{labels:lbls,datasets:[
-      {label:'Lead Quente',data:meses.map(m=>D[m].fupQuente||0),backgroundColor:'#E8734A',borderRadius:4},
-      {label:'Lead Morno', data:meses.map(m=>D[m].fupMorno||0), backgroundColor:'#A87DD8',borderRadius:4},
-      {label:'Lead Frio',  data:meses.map(m=>D[m].fupFrio||0),  backgroundColor:'#6BAED4',borderRadius:4},
-      {label:'Instagram',  data:meses.map(m=>D[m].fupIG||0),    backgroundColor:'#ED93B1',borderRadius:4},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#B0A0C0'}},
-              y:{stacked:true,grid:{color:'rgba(196,163,232,.15)'},ticks:{color:'#B0A0C0'}}}}});
+// Estado do filtro de período nesta seção (independente do filtro de período da página Leads)
+let qualMatrixPeriodActive=false;
+let qualMatrixPieCharts=[]; // guarda as instâncias dos mini-gráficos para destruir antes de re-renderizar
 
-  // LOST per month
-  if(cLostComp){cLostComp.destroy();cLostComp=null;}
-  cLostComp=new Chart(document.getElementById('cLostComp'),{type:'bar',
-    data:{labels:lbls,datasets:[{label:'LOST',data:meses.map(m=>D[m].lost||0),backgroundColor:'#F0A0C0',borderRadius:5,borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{color:'#B0A0C0'}},y:{grid:{color:'rgba(196,163,232,.15)'},ticks:{color:'#B0A0C0'}}}}});
+function onQualMatrixMonthChange(){
+  qualMatrixPeriodActive=false;
+  document.getElementById('qual-matrix-data-ini').value='';
+  document.getElementById('qual-matrix-data-fim').value='';
+  renderQualMatrix();
+}
+function onQualMatrixPeriodChange(){
+  const ini=document.getElementById('qual-matrix-data-ini').value;
+  const fim=document.getElementById('qual-matrix-data-fim').value;
+  qualMatrixPeriodActive=!!(ini||fim);
+  if(qualMatrixPeriodActive)document.getElementById('qual-matrix-mes').value='all';
+  renderQualMatrix();
+}
+function clearQualMatrixPeriod(){
+  document.getElementById('qual-matrix-data-ini').value='';
+  document.getElementById('qual-matrix-data-fim').value='';
+  qualMatrixPeriodActive=false;
+  renderQualMatrix();
+}
 
-  // Erro FUP per month
-  if(cErroFupComp){cErroFupComp.destroy();cErroFupComp=null;}
-  cErroFupComp=new Chart(document.getElementById('cErroFupComp'),{type:'bar',
-    data:{labels:lbls,datasets:[{label:'Erro FUP',data:meses.map(m=>D[m].erroFup||0),backgroundColor:'#C4A3E8',borderRadius:5,borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{color:'#B0A0C0'}},y:{grid:{color:'rgba(196,163,232,.15)'},ticks:{color:'#B0A0C0'}}}}});
+function renderQualMatrix(){
+  const wrap=document.getElementById('qual-matrix-wrap');
+  const legendEl=document.getElementById('qual-matrix-legend');
+  if(!wrap)return;
 
-  // Monthly summary table
-  const pct2=v=>v!==undefined?`${(v*100).toFixed(1)}%`:'-';
-  document.getElementById('fup-monthly-table').innerHTML=`
-    <div class="tbl-wrap"><table class="tbl">
-      <thead><tr>
-        <th>Mês</th><th>Leads</th><th>FUP total</th><th>Lead Quente</th><th>Lead Morno</th><th>Lead Frio</th><th>Instagram</th><th>Erro FUP</th><th>LOST</th><th>% LOST</th>
-      </tr></thead>
-      <tbody>`+meses.map(m=>{
-        const d=D[m];
-        const totalFup=(d.fupWA||0)+(d.fupIG||0)+(d.fupQuente||0)+(d.fupMorno||0)+(d.fupFrio||0);
-        const pctLost=d.leads>0?pct(d.lost/d.leads):'-';
-        return`<tr>
-          <td style="font-weight:600;color:var(--tx1)">${d.label}</td>
-          <td>${d.leads}</td>
-          <td><strong style="color:var(--lil600)">${totalFup}</strong></td>
-          <td style="color:#E8734A;font-weight:600">${d.fupQuente||0}</td>
-          <td style="color:#A87DD8;font-weight:600">${d.fupMorno||0}</td>
-          <td style="color:#6BAED4;font-weight:600">${d.fupFrio||0}</td>
-          <td style="color:#ED93B1;font-weight:600">${d.fupIG||0}</td>
-          <td style="color:var(--txm)">${d.erroFup||0}</td>
-          <td style="color:var(--pk500);font-weight:600">${d.lost||0}</td>
-          <td style="color:${(d.lost/d.leads)>0.3?'var(--pk500)':'var(--mn500)'};font-weight:600">${pctLost}</td>
-        </tr>`;
-      }).join('')+`</tbody></table></div>`;
+  // Limpa mini-gráficos da renderização anterior antes de recriar
+  qualMatrixPieCharts.forEach(c=>{try{c.destroy();}catch(e){}});
+  qualMatrixPieCharts=[];
+
+  if(uploadedLeads.length===0){
+    wrap.innerHTML='<div style="font-size:12px;color:var(--txm);text-align:center;padding:30px;grid-column:1/-1">Suba uma planilha em Base de Leads para ver a fase de cada lead cruzada com a origem.</div>';
+    legendEl.innerHTML='';
+    return;
+  }
+
+  const dim=document.getElementById('qual-matrix-dim').value; // fonte | campanha | canal | fonteSessao1 | conteudoUTM
+
+  let leads;
+  if(qualMatrixPeriodActive){
+    const iniVal=document.getElementById('qual-matrix-data-ini').value;
+    const fimVal=document.getElementById('qual-matrix-data-fim').value;
+    const iniTs=iniVal?new Date(iniVal+'T00:00:00').getTime():null;
+    const fimTs=fimVal?new Date(fimVal+'T23:59:59').getTime():null;
+    leads=uploadedLeads.filter(l=>{
+      if(l.dataObj===null||l.dataObj===undefined)return false;
+      if(iniTs!==null&&l.dataObj<iniTs)return false;
+      if(fimTs!==null&&l.dataObj>fimTs)return false;
+      return true;
+    });
+  } else {
+    const mesFiltro=document.getElementById('qual-matrix-mes').value;
+    leads=mesFiltro==='all'?uploadedLeads:uploadedLeads.filter(l=>l.mes===mesFiltro);
+  }
+
+  // Valor de origem por lead, conforme dimensão escolhida (fonte usa a versão simplificada já existente).
+  // Leads sem nenhum valor caem em "(vazio)" — propositalmente incluídos (não excluídos) para que a
+  // usuária consiga ver exatamente quem são esses leads sem rastreamento de origem.
+  function originValue(l){
+    if(dim==='fonte'){
+      const v=simpFonte(l.fonte);
+      return(!v||v==='(sem fonte)')?'(vazio)':v;
+    }
+    const v=String(l[dim]||'').trim();
+    return v||'(vazio)';
+  }
+
+  // Monta contagem: origem -> fase -> contagem, e também guarda os leads individuais de cada
+  // origem (nome + etapa) para a lista detalhada no modal — essencial para o card "(vazio)".
+  const matrix={};
+  const originTotals={};
+  const originLeads={};
+  leads.forEach(l=>{
+    const origin=originValue(l);
+    if(!origin)return;
+    const phase=qualPhaseGroupOf(l.etapa);
+    if(!matrix[origin])matrix[origin]={};
+    matrix[origin][phase]=(matrix[origin][phase]||0)+1;
+    originTotals[origin]=(originTotals[origin]||0)+1;
+    if(!originLeads[origin])originLeads[origin]=[];
+    originLeads[origin].push({nome:l.nome,etapa:l.etapa,mes:l.mes,data:l.data});
+  });
+
+  // Só mostra fases que realmente aparecem nos dados filtrados, na ordem definida em QUAL_PHASE_GROUPS
+  const usedPhaseKeys=new Set();
+  Object.values(matrix).forEach(row=>Object.keys(row).forEach(k=>usedPhaseKeys.add(k)));
+  const phaseCols=QUAL_PHASE_GROUPS.filter(g=>usedPhaseKeys.has(g.key));
+
+  // Ordena origens pelo total (desc), top 12 cards para não estourar a tela
+  const topOrigins=Object.entries(originTotals).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k])=>k);
+
+  if(topOrigins.length===0){
+    wrap.innerHTML='<div style="font-size:12px;color:var(--txm);text-align:center;padding:30px;grid-column:1/-1">Nenhum dado de origem encontrado para este filtro (Canal, Fonte de sessão e Anúncio só vêm preenchidos a partir de Junho/2026).</div>';
+    legendEl.innerHTML='';
+    return;
+  }
+
+  // Legenda fixa no topo (uma vez, vale pra todos os cards)
+  legendEl.innerHTML=phaseCols.map(p=>`<span style="display:flex;align-items:center;gap:4px"><span class="ld" style="background:${p.color}"></span>${escapeHtml(p.label)}</span>`).join('');
+
+  // Guarda os dados num escopo global para o modal de detalhe poder reabrir ao clicar no card
+  qualMatrixData={matrix,phaseCols,originLeads,dim,dimLabel:document.getElementById('qual-matrix-dim').selectedOptions[0].textContent};
+
+  // Monta os cards (canvas vazios primeiro, Chart.js entra depois que o HTML estiver no DOM)
+  wrap.innerHTML=topOrigins.map((origin,i)=>{
+    const phasesForOrigin=phaseCols.filter(p=>(matrix[origin]?.[p.key]||0)>0);
+    const topPhase=phasesForOrigin.map(p=>({label:p.label,n:matrix[origin][p.key],color:p.color})).sort((a,b)=>b.n-a.n)[0];
+    return`<div class="qmx-card" onclick="openQmxDetail('${origin.replace(/'/g,"\\'")}')" title="Clique para ver o detalhe">
+      <div class="qmx-name" title="${escapeHtml(origin)}">${escapeHtml(origin.length>34?origin.slice(0,32)+'…':origin)}</div>
+      <div class="qmx-chart-wrap"><canvas id="qmx-pie-${i}" role="img" aria-label="Distribuição de fases para ${escapeHtml(origin)}."></canvas></div>
+      <div class="qmx-total">${originTotals[origin]}</div>
+      <div class="qmx-total-lbl">leads</div>
+      ${topPhase?`<div class="qmx-toplabel">Principal:<br><strong style="color:${topPhase.color}">${escapeHtml(topPhase.label)}</strong> (${topPhase.n})</div>`:''}
+    </div>`;
+  }).join('');
+
+  // Cria os mini-gráficos de pizza depois que o HTML já está no DOM
+  topOrigins.forEach((origin,i)=>{
+    const phasesForOrigin=phaseCols.filter(p=>(matrix[origin]?.[p.key]||0)>0);
+    const canvas=document.getElementById(`qmx-pie-${i}`);
+    if(!canvas)return;
+    const chart=new Chart(canvas,{type:'doughnut',
+      data:{labels:phasesForOrigin.map(p=>p.label),datasets:[{data:phasesForOrigin.map(p=>matrix[origin][p.key]),backgroundColor:phasesForOrigin.map(p=>p.color),borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
+    qualMatrixPieCharts.push(chart);
+  });
+}
+
+// Abre o modal de detalhe de uma origem específica (chamado ao clicar num card),
+// com um gráfico de barras maior e mais legível do que o mini-donut do card.
+let qualMatrixData=null;
+let qmxDetailChart=null;
+function openQmxDetail(origin){
+  if(!qualMatrixData)return;
+  const{matrix,phaseCols,originLeads,dimLabel}=qualMatrixData;
+  const row=matrix[origin]||{};
+  const phasesForOrigin=phaseCols.filter(p=>(row[p.key]||0)>0).sort((a,b)=>(row[b.key]||0)-(row[a.key]||0));
+  const total=phasesForOrigin.reduce((s,p)=>s+row[p.key],0);
+  const leadsList=(originLeads&&originLeads[origin])||[];
+
+  document.getElementById('qmx-detail-title').textContent=origin;
+  document.getElementById('qmx-detail-subtitle').textContent=origin==='(vazio)'
+    ?`${dimLabel} não preenchida na planilha · ${total} lead(s) sem essa informação`
+    :`${dimLabel} · ${total} lead(s) no total`;
+
+  if(qmxDetailChart){qmxDetailChart.destroy();qmxDetailChart=null;}
+  const canvas=document.getElementById('qmx-detail-chart');
+  qmxDetailChart=new Chart(canvas,{type:'bar',
+    data:{labels:phasesForOrigin.map(p=>p.label),datasets:[{data:phasesForOrigin.map(p=>row[p.key]),backgroundColor:phasesForOrigin.map(p=>p.color),borderRadius:6,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x} lead(s)`}}},
+      scales:{x:{grid:{color:'rgba(196,163,232,.15)'},ticks:{color:'#B0A0C0',precision:0}},y:{grid:{display:false},ticks:{color:'#2A1054',font:{size:11,weight:600}}}}}});
+
+  const distHtml=phasesForOrigin.map(p=>{
+    const n=row[p.key];
+    const pctOfTotal=total>0?Math.round(n/total*100):0;
+    return`<div class="pi">
+      <div class="pl" style="color:${p.color};font-weight:600">${escapeHtml(p.label)}</div>
+      <div class="pt" style="width:100px"><div class="pf" style="width:${pctOfTotal}%;background:${p.color}"></div></div>
+      <div class="pn">${n}</div>
+      <span style="font-size:10px;color:var(--txm);margin-left:6px;flex-shrink:0">${pctOfTotal}%</span>
+    </div>`;
+  }).join('');
+
+  // Lista de nomes dos leads desta origem — colapsável, pra não ocupar o modal inteiro de cara.
+  // Cada linha tem um botão ✏️ pra corrigir manualmente a origem desse lead específico, útil
+  // principalmente quando a origem clicada é "(vazio)" e a usuária sabe de onde o lead veio.
+  const namesHtml=leadsList.length===0?'':`
+    <div style="margin-top:18px;border-top:1px solid var(--lil50);padding-top:14px">
+      <div onclick="toggleAcc(this)" class="acc-header" style="padding:8px 0;cursor:pointer">
+        <span class="acc-name" style="font-size:12px">📋 Ver os ${leadsList.length} lead(s) individualmente</span>
+        <span class="acc-chevron">▼</span>
+      </div>
+      <div class="acc-body" style="padding:0">
+        <p style="font-size:11px;color:var(--txm);margin:8px 0">Sabe de onde algum desses leads veio? Clique no ✏️ para preencher manualmente — a correção fica salva mesmo se você subir uma planilha nova depois.</p>
+        <div class="tbl-wrap" style="max-height:280px;overflow-y:auto">
+          <table class="tbl">
+            <thead><tr><th>Nome</th><th>Etapa</th><th>Mês</th><th>Data</th><th></th></tr></thead>
+            <tbody>${leadsList.map((l,li)=>`<tr>
+              <td style="font-weight:600;color:var(--tx1)">${escapeHtml(l.nome)}</td>
+              <td><span class="badge bp">${escapeHtml(l.etapa.slice(0,28))}</span></td>
+              <td style="color:var(--txm)">${escapeHtml(l.mes)}</td>
+              <td style="color:var(--txm)">${escapeHtml(l.data)}</td>
+              <td><button class="btn-s" style="padding:4px 8px;font-size:10px" onclick="openOriginCorrectionModal(${li})">✏️</button></td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('qmx-detail-list').innerHTML=distHtml+namesHtml;
+  qmxDetailLeadsList=leadsList; // guarda a lista atual para o modal de correção poder consultar pelo índice
+  openM('qmx-detail');
+}
+
+let qmxDetailLeadsList=[];
+function openOriginCorrectionModal(idx){
+  const lead=qmxDetailLeadsList[idx];
+  if(!lead||!qualMatrixData)return;
+  document.getElementById('oc-lead-nome').textContent=lead.nome;
+  document.getElementById('oc-lead-mes').textContent=lead.mes;
+  document.getElementById('oc-campo-label').textContent=qualMatrixData.dimLabel;
+  document.getElementById('oc-lead-nome-hidden').value=lead.nome;
+  document.getElementById('oc-lead-mes-hidden').value=lead.mes;
+  document.getElementById('oc-campo-hidden').value=qualMatrixData.dim;
+  document.getElementById('oc-valor').value='';
+  openM('origin-correction');
+}
+function confirmOriginCorrection(){
+  const nome=document.getElementById('oc-lead-nome-hidden').value;
+  const mes=document.getElementById('oc-lead-mes-hidden').value;
+  const campo=document.getElementById('oc-campo-hidden').value;
+  const valor=document.getElementById('oc-valor').value.trim();
+  if(!valor){alert('Preencha o valor da origem.');return;}
+  // Para a dimensão "fonte" o valor digitado precisa bater com o que simpFonte() reconhece para
+  // refletir corretamente nos cards; para as demais dimensões, o campo é usado direto.
+  saveOriginCorrection(nome,mes,campo,valor);
+  closeM('origin-correction');
+  renderQualMatrix(); // já recalcula tudo com a correção aplicada
+  alert('Origem atualizada! O card já reflete a mudança.');
 }
 
 function renderQualMonthDetail(m){
@@ -2931,17 +3396,42 @@ function renderQualMonthDetail(m){
       <div style="font-size:11px;color:var(--txm);width:140px;flex-shrink:0">${QUAL_LABELS[d.s]}</div>
     </div>`).join('');
 
-  // Lead list grouped by score desc
+  // Lead list grouped by score desc — mostra só os 5 primeiros por padrão, com botão pra expandir
   const sorted=[...leads].sort((a,b)=>b.q-a.q);
-  document.getElementById('qual-leads-list').innerHTML=sorted.length===0
-    ?`<div style="text-align:center;color:var(--txm);padding:24px;font-size:13px">Nenhum lead com score de qualificação para ${mesLbl}.<br><small>Adicione scores nas Pré-Calls e Reuniões Closer do Report.</small></div>`
-    :`<table class="tbl" style="margin-top:4px"><thead><tr><th>Lead</th><th>Fase</th><th>Status</th><th>Score</th></tr></thead><tbody>`+
-    sorted.map(l=>`<tr>
-      <td style="font-weight:600;color:var(--tx1)">${e(l.nome)}</td>
-      <td><span class="badge bp">${e(l.fase)}</span></td>
+  const PREVIEW_COUNT=5;
+  function rowHtml(l){
+    return`<tr>
+      <td style="font-weight:600;color:var(--tx1)">${escapeHtml(l.nome)}</td>
+      <td><span class="badge bp">${l.fase}</span></td>
       <td><span class="badge ${l.status==='Realizada'?'bw':l.status==='No-show'?'bl':'bf'}">${l.status}</span></td>
       <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="font-size:15px;font-weight:700;color:${QUAL_COLORS[l.q]};background:${QUAL_COLORS[l.q]}18;border-radius:6px;padding:2px 10px">${l.q}/5</span><span style="font-size:11px;color:var(--txm)">${QUAL_LABELS[l.q]}</span></span></td>
-    </tr>`).join('')+'</tbody></table>';
+    </tr>`;
+  }
+  if(sorted.length===0){
+    document.getElementById('qual-leads-list').innerHTML=`<div style="text-align:center;color:var(--txm);padding:24px;font-size:13px">Nenhum lead com score de qualificação para ${mesLbl}.<br><small>Adicione scores nas Pré-Calls e Reuniões Closer do Report.</small></div>`;
+  } else if(sorted.length<=PREVIEW_COUNT){
+    document.getElementById('qual-leads-list').innerHTML=`<table class="tbl" style="margin-top:4px"><thead><tr><th>Lead</th><th>Fase</th><th>Status</th><th>Score</th></tr></thead><tbody>${sorted.map(rowHtml).join('')}</tbody></table>`;
+  } else {
+    const previewRows=sorted.slice(0,PREVIEW_COUNT).map(rowHtml).join('');
+    const restRows=sorted.slice(PREVIEW_COUNT).map(rowHtml).join('');
+    document.getElementById('qual-leads-list').innerHTML=`
+      <table class="tbl" style="margin-top:4px"><thead><tr><th>Lead</th><th>Fase</th><th>Status</th><th>Score</th></tr></thead>
+        <tbody id="qual-leads-preview">${previewRows}</tbody>
+        <tbody id="qual-leads-rest" style="display:none">${restRows}</tbody>
+      </table>
+      <button class="btn-s" id="qual-leads-toggle" data-total="${sorted.length}" onclick="toggleQualLeadsList()" style="margin-top:10px">Ver todos os ${sorted.length} leads ▾</button>`;
+  }
+}
+
+// Expande/recolhe a tabela de "Leads por score" — começa mostrando só os 5 primeiros
+function toggleQualLeadsList(){
+  const rest=document.getElementById('qual-leads-rest');
+  const btn=document.getElementById('qual-leads-toggle');
+  if(!rest||!btn)return;
+  const isOpen=rest.style.display!=='none';
+  const total=btn.dataset.total;
+  rest.style.display=isOpen?'none':'table-row-group';
+  btn.textContent=isOpen?`Ver todos os ${total} leads ▾`:`Mostrar menos ▴`;
 }
 
 // ═══════════════════════════════════════════════
@@ -3162,8 +3652,8 @@ function renderIAHistory() {
     list.innerHTML = hist.map((h, i) => `
       <div class="ia-hist-item" onclick="expandIAHistory(${i})">
         <div class="ih-header">
-          <span class="ih-month">${e(h.mesLabel)}</span>
-          <span class="ih-date">${e(h.date)}</span>
+          <span class="ih-month">${h.mesLabel}</span>
+          <span class="ih-date">${h.date}</span>
         </div>
         <div class="ih-preview" id="ia-hist-preview-${i}">${h.html.replace(/<[^>]*>/g,'').slice(0,120)}...</div>
         <div id="ia-hist-body-${i}" style="display:none;margin-top:10px" class="ia-body">${h.html}</div>
@@ -3307,7 +3797,7 @@ function importBackup(event){
 
 function saveState(){
   try{
-    const payload={D,allR,allC,allOb,allPreCalls,uploadedLeads,allTasksFixas,allTasksHoje,allProj,allLeadDetails,allCad,savedAt:new Date().toISOString()};
+    const payload={D,allR,allC,allOb,allPreCalls,uploadedLeads,originCorrections,allTasksFixas,allTasksHoje,allProj,allLeadDetails,allCad,savedAt:new Date().toISOString()};
     localStorage.setItem(LS_KEY,JSON.stringify(payload));
   }catch(err){console.error('Falha ao salvar dados:',err);}
 }
@@ -3323,11 +3813,13 @@ function loadState(){
     if(Array.isArray(payload.allOb))allOb=payload.allOb;
     if(Array.isArray(payload.allPreCalls))allPreCalls=payload.allPreCalls;
     if(Array.isArray(payload.uploadedLeads))uploadedLeads=payload.uploadedLeads;
+    if(Array.isArray(payload.originCorrections))originCorrections=payload.originCorrections;
     if(Array.isArray(payload.allTasksFixas))allTasksFixas=payload.allTasksFixas;
     if(Array.isArray(payload.allTasksHoje))allTasksHoje=payload.allTasksHoje;
     if(Array.isArray(payload.allProj))allProj=payload.allProj;
     if(Array.isArray(payload.allLeadDetails))allLeadDetails=payload.allLeadDetails;
     if(Array.isArray(payload.allCad))allCad=payload.allCad;
+    if(uploadedLeads.length>0)applyOriginCorrections(); // garante consistência mesmo se as correções tiverem sido salvas depois do último parse
     return true;
   }catch(err){console.error('Falha ao carregar dados salvos:',err);return false;}
 }
@@ -3350,17 +3842,17 @@ if(uploadedLeads.length>0){
   `;
   const etapas={};uploadedLeads.forEach(l=>{if(l.etapa)etapas[l.etapa]=(etapas[l.etapa]||0)+1;});
   const mx=Math.max(...Object.values(etapas),1);
-  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([et,n])=>`
-    <div class="pi"><div class="pl" title="${e(et)}">${e(et)}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
+  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([e,n])=>`
+    <div class="pi"><div class="pl" title="${escapeHtml(e)}">${escapeHtml(e)}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
   const sample=uploadedLeads.slice(0,30);
-  const badgeE=et=>et.includes('GANHO')?'bw':et==='LOST'?'bl':/Follow|FUP/i.test(et)?'bf':'bp';
+  const badgeE=e=>e.includes('GANHO')?'bw':e==='LOST'?'bl':/Follow|FUP/i.test(e)?'bf':'bp';
   document.getElementById('tb-base').innerHTML=sample.map((l,i)=>`<tr>
     <td style="color:var(--txm)">${i+1}</td>
-    <td style="font-weight:600;color:var(--tx1)">${e(l.nome.slice(0,35))}</td>
-    <td><span class="badge ${badgeE(l.etapa)}">${e(l.etapa.slice(0,28))}</span></td>
-    <td>${e(l.data)}</td>
-    <td style="color:var(--txm)">${e(l.motivo.slice(0,30))||'—'}</td>
-    <td style="color:var(--txm)">${e(l.fonte.slice(0,20))||'—'}</td>
+    <td style="font-weight:600;color:var(--tx1)">${escapeHtml(l.nome.slice(0,35))}</td>
+    <td><span class="badge ${badgeE(l.etapa)}">${escapeHtml(l.etapa.slice(0,28))}</span></td>
+    <td>${escapeHtml(l.data)}</td>
+    <td style="color:var(--txm)">${escapeHtml(l.motivo.slice(0,30))||'—'}</td>
+    <td style="color:var(--txm)">${escapeHtml(l.fonte.slice(0,20))||'—'}</td>
   </tr>`).join('');
 }
 if(hadSavedData)syncObToReports();

@@ -1123,6 +1123,9 @@ Excel.</button></div><div id="r-qual-label" style="font-size:11px;color:var(--tx
 </div>
 
 <script>
+// Escapes HTML special chars to prevent XSS when injecting user data via innerHTML
+function e(s){const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML;}
+
 // ═══ COMMISSION RATES ═══
 const COMM_REU={'Inbound':20,'Inbound reengajado':35,'Outbound indicação':40,'Outbound':50};
 const COMM_CON={'Inbound':35,'Inbound reengajado':55,'Outbound indicação':100,'Outbound':120};
@@ -1577,7 +1580,7 @@ function renderReunioes(m){
   const ob=o=>o==='Inbound'?'bi':o==='Outbound'?'bo':o==='Inbound reengajado'?'br':'by';
   document.getElementById('tb-r').innerHTML=rows.length===0
     ?`<tr><td colspan="6" style="text-align:center;color:var(--txm);padding:24px">Nenhuma reunião para ${mes}.</td></tr>`
-    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${r.n}</td><td style="color:var(--txm)">${r.f||'—'}</td><td><span class="badge ${ob(r.o)}">${r.o}</span></td><td>${r.m}</td><td><span class="badge ${sb(r.s)}">${r.s}</span></td><td style="white-space:nowrap"><button class="btn-s" onclick="editR(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delR(${r._i})">🗑</button></td></tr>`).join('');
+    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${e(r.n)}</td><td style="color:var(--txm)">${e(r.f)||'—'}</td><td><span class="badge ${ob(r.o)}">${e(r.o)}</span></td><td>${e(r.m)}</td><td><span class="badge ${sb(r.s)}">${e(r.s)}</span></td><td style="white-space:nowrap"><button class="btn-s" onclick="editR(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delR(${r._i})">🗑</button></td></tr>`).join('');
 }
 
 // ═══ TABLES: CONTRATOS ═══
@@ -1588,7 +1591,7 @@ function renderContratos(m){
   const tb=t=>t==='Lead do mês'?'bp':'bw';
   document.getElementById('tb-c').innerHTML=rows.length===0
     ?`<tr><td colspan="7" style="text-align:center;color:var(--txm);padding:24px">Nenhum contrato para ${mes}.</td></tr>`
-    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${r.n}</td><td style="color:var(--txm)">${r.f||'—'}</td><td><span class="badge ${ob(r.o)}">${r.o}</span></td><td>${r.m}</td><td><span class="badge ${tb(r.t)}">${r.t}</span></td><td>${r.fla?'<span class="badge bfla">✨ Sim</span>':'<span style="font-size:11px;color:var(--txm)">Não</span>'}</td><td style="white-space:nowrap"><button class="btn-s" onclick="editC(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delC(${r._i})">🗑</button></td></tr>`).join('');
+    :rows.map(r=>`<tr><td style="font-weight:600;color:var(--tx1)">${e(r.n)}</td><td style="color:var(--txm)">${e(r.f)||'—'}</td><td><span class="badge ${ob(r.o)}">${e(r.o)}</span></td><td>${e(r.m)}</td><td><span class="badge ${tb(r.t)}">${e(r.t)}</span></td><td>${r.fla?'<span class="badge bfla">✨ Sim</span>':'<span style="font-size:11px;color:var(--txm)">Não</span>'}</td><td style="white-space:nowrap"><button class="btn-s" onclick="editC(${r._i})" style="margin-right:4px">✏️</button><button class="btn-s del" onclick="delC(${r._i})">🗑</button></td></tr>`).join('');
   renderOrigC(m);
 }
 
@@ -1857,16 +1860,16 @@ function renderLeadsAnalytics(){
   const sample=tableLeads.slice(0,150);
   document.getElementById('leads-count').textContent=`Exibindo ${sample.length} de ${tableLeads.length} leads`;
 
-  const badgeE=e=>e.includes('GANHO')?'bw':e==='LOST'?'bl':/FUP|Follow/i.test(e)?'bf':/Erro/i.test(e)?'bl':'bp';
+  const badgeE=et=>et.includes('GANHO')?'bw':et==='LOST'?'bl':/FUP|Follow/i.test(et)?'bf':/Erro/i.test(et)?'bl':'bp';
   document.getElementById('tb-leads').innerHTML=sample.map((l,i)=>`<tr>
     <td style="color:var(--txm)">${i+1}</td>
-    <td style="font-weight:600;color:var(--tx1)">${l.nome.slice(0,35)}</td>
-    <td><span class="badge ${badgeE(l.etapa)}">${l.etapa.slice(0,26)}</span></td>
-    <td style="color:var(--txm)">${l.mes}</td>
-    <td style="color:var(--txm)">${l.data}</td>
-    <td style="color:var(--txm)">${(l.fonte||'').slice(0,24)||'—'}</td>
-    <td style="color:var(--txm);font-size:11px">${(l.campanha||'').slice(0,38)||'—'}</td>
-    <td style="color:var(--txm)">${(l.motivo||'').slice(0,30)||'—'}</td>
+    <td style="font-weight:600;color:var(--tx1)">${e(l.nome.slice(0,35))}</td>
+    <td><span class="badge ${badgeE(l.etapa)}">${e(l.etapa.slice(0,26))}</span></td>
+    <td style="color:var(--txm)">${e(l.mes)}</td>
+    <td style="color:var(--txm)">${e(l.data)}</td>
+    <td style="color:var(--txm)">${e((l.fonte||'').slice(0,24))||'—'}</td>
+    <td style="color:var(--txm);font-size:11px">${e((l.campanha||'').slice(0,38))||'—'}</td>
+    <td style="color:var(--txm)">${e((l.motivo||'').slice(0,30))||'—'}</td>
   </tr>`).join('');
 }
 
@@ -1905,7 +1908,7 @@ function renderTaskGroup(group,elId,arr){
   el.innerHTML=arr.map((t,i)=>`
     <div class="task-item ${t.done?'done':''}">
       <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${group}',${i})">${t.done?'✓':''}</div>
-      <div class="task-text">${t.text}</div>
+      <div class="task-text">${e(t.text)}</div>
       <button class="btn-s del" style="padding:3px 8px;font-size:10px" onclick="delTask('${group}',${i})">🗑</button>
     </div>`).join('');
 }
@@ -1921,7 +1924,7 @@ function renderTaskGroupHoje(){
     html=visibleToday.map(t=>`
       <div class="task-item ${t.done?'done':''}">
         <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('hoje',${t._i})">${t.done?'✓':''}</div>
-        <div class="task-text">${t.text}</div>
+        <div class="task-text">${e(t.text)}</div>
         <button class="btn-s del" style="padding:3px 8px;font-size:10px" onclick="delTask('hoje',${t._i})">🗑</button>
       </div>`).join('');
     if(scheduled.length>0){
@@ -1929,7 +1932,7 @@ function renderTaskGroupHoje(){
       scheduled.map(t=>`
         <div class="task-item" style="opacity:.7">
           <div class="task-check" style="border-color:var(--txm)"></div>
-          <div class="task-text">${t.text} <span style="font-size:10px;color:var(--lil600);font-weight:600">· ${formatDatePtBr(t.date)}</span></div>
+          <div class="task-text">${e(t.text)} <span style="font-size:10px;color:var(--lil600);font-weight:600">· ${formatDatePtBr(t.date)}</span></div>
           <button class="btn-s del" style="padding:3px 8px;font-size:10px" onclick="delTask('hoje',${t._i})">🗑</button>
         </div>`).join('');
     }
@@ -1976,9 +1979,9 @@ function renderProjList(){
   const statusColor={'Ideia':'by','Planejando':'bp','Em andamento':'bf','Concluído':'bw','Pausado':'bl'};
   el.innerHTML=allProj.map((p,i)=>`
     <div class="proj-card">
-      <div class="pc-title">${p.nome}</div>
-      <span class="badge ${statusColor[p.status]||'bp'}" style="margin-bottom:8px;display:inline-block">${p.status}</span>
-      <div class="pc-desc">${p.desc||''}</div>
+      <div class="pc-title">${e(p.nome)}</div>
+      <span class="badge ${statusColor[p.status]||'bp'}" style="margin-bottom:8px;display:inline-block">${e(p.status)}</span>
+      <div class="pc-desc">${e(p.desc||'')}</div>
       <div style="display:flex;gap:6px;margin-top:10px">
         <button class="btn-s" onclick="editProj(${i})">✏️ Editar</button>
         <button class="btn-s del" onclick="delProj(${i})">🗑</button>
@@ -2032,11 +2035,11 @@ function renderPrecallPage(){
     <div class="acc-item">
       <div class="acc-header" onclick="toggleAcc(this)">
         <span class="acc-tipo" style="background:${l.tipo==='qual'?'var(--mn100)':'#FFF0F0'};color:${l.tipo==='qual'?'var(--mn700)':'#A32D2D'}">${l.tipo==='qual'?'✅ Qualificado':'🚫 Desqualificado'}</span>
-        <span class="acc-name">${l.nome}</span>
+        <span class="acc-name">${e(l.nome)}</span>
         <span class="acc-chevron">▼</span>
       </div>
       <div class="acc-body">
-        <div class="acc-text">${l.texto||'Sem detalhes.'}</div>
+        <div class="acc-text">${e(l.texto||'Sem detalhes.')}</div>
         <div class="acc-actions">
           <button class="btn-s" onclick="editLeadDetail(${l._i})">✏️ Editar</button>
           <button class="btn-s del" onclick="delLeadDetail(${l._i})">🗑</button>
@@ -2083,11 +2086,11 @@ function renderCadencias(){
   el.innerHTML=allCad.map((c,i)=>`
     <div class="acc-item">
       <div class="acc-header" onclick="toggleAcc(this)">
-        <span class="acc-name">✉️ ${c.nome}</span>
+        <span class="acc-name">✉️ ${e(c.nome)}</span>
         <span class="acc-chevron">▼</span>
       </div>
       <div class="acc-body">
-        <div class="acc-text">${c.texto}</div>
+        <div class="acc-text">${e(c.texto)}</div>
         <div class="acc-actions">
           <button class="btn-s" onclick="editCad(${i})">✏️ Editar</button>
           <button class="btn-s del" onclick="delCad(${i})">🗑</button>
@@ -2132,10 +2135,10 @@ function renderPreCallsTable(m){
   el.innerHTML=rows.length===0
     ?`<tr><td colspan="5" style="text-align:center;color:var(--txm);padding:20px">Nenhuma pré-call registrada para ${mes}. Clique em + Adicionar.</td></tr>`
     :rows.map(r=>`<tr>
-        <td style="font-weight:600;color:var(--tx1)">${r.n}</td>
-        <td><span class="badge ${r.o==='Inbound'?'bi':r.o==='Outbound'?'bo':r.o==='Inbound reengajado'?'br':'by'}">${r.o}</span></td>
-        <td>${r.m}</td>
-        <td><span class="badge ${sb(r.s)}">${r.s}</span></td>
+        <td style="font-weight:600;color:var(--tx1)">${e(r.n)}</td>
+        <td><span class="badge ${r.o==='Inbound'?'bi':r.o==='Outbound'?'bo':r.o==='Inbound reengajado'?'br':'by'}">${e(r.o)}</span></td>
+        <td>${e(r.m)}</td>
+        <td><span class="badge ${sb(r.s)}">${e(r.s)}</span></td>
         <td style="white-space:nowrap">
           <button class="btn-s" onclick="editPCR(${r._i})" style="margin-right:4px">✏️</button>
           <button class="btn-s del" onclick="delPCR(${r._i})">🗑</button>
@@ -2318,17 +2321,17 @@ function processBase(raw,fname){
   `;
   const etapas={};uploadedLeads.forEach(l=>{if(l.etapa)etapas[l.etapa]=(etapas[l.etapa]||0)+1;});
   const mx=Math.max(...Object.values(etapas),1);
-  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([e,n])=>`
-    <div class="pi"><div class="pl" title="${e}">${e}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
+  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([et,n])=>`
+    <div class="pi"><div class="pl" title="${e(et)}">${e(et)}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
   const sample=uploadedLeads.slice(0,30);
-  const badgeE=e=>e.includes('GANHO')?'bw':e==='LOST'?'bl':/Follow|FUP/i.test(e)?'bf':'bp';
+  const badgeE=et=>et.includes('GANHO')?'bw':et==='LOST'?'bl':/Follow|FUP/i.test(et)?'bf':'bp';
   document.getElementById('tb-base').innerHTML=sample.map((l,i)=>`<tr>
     <td style="color:var(--txm)">${i+1}</td>
-    <td style="font-weight:600;color:var(--tx1)">${l.nome.slice(0,35)}</td>
-    <td><span class="badge ${badgeE(l.etapa)}">${l.etapa.slice(0,28)}</span></td>
-    <td>${l.data}</td>
-    <td style="color:var(--txm)">${l.motivo.slice(0,30)||'—'}</td>
-    <td style="color:var(--txm)">${l.fonte.slice(0,20)||'—'}</td>
+    <td style="font-weight:600;color:var(--tx1)">${e(l.nome.slice(0,35))}</td>
+    <td><span class="badge ${badgeE(l.etapa)}">${e(l.etapa.slice(0,28))}</span></td>
+    <td>${e(l.data)}</td>
+    <td style="color:var(--txm)">${e(l.motivo.slice(0,30))||'—'}</td>
+    <td style="color:var(--txm)">${e(l.fonte.slice(0,20))||'—'}</td>
   </tr>`).join('');
 
   // ── Auto-generate / update month pages in Reports from this BASE upload ──
@@ -2544,8 +2547,8 @@ function renderObKanban(){
       <div class="kb-cards">
         ${cards.length===0?'<div class="kb-empty">Arraste um lead aqui</div>':cards.map(c=>`
           <div class="kb-card" draggable="true" ondragstart="obDragStart(event,${c._i})" ondragend="obDragEnd(event)">
-            <div class="kbc-name">${c.nome}</div>
-            <div class="kbc-fonte">${c.fonte||'—'}</div>
+            <div class="kbc-name">${e(c.nome)}</div>
+            <div class="kbc-fonte">${e(c.fonte||'—')}</div>
             <div style="display:flex;gap:4px;margin-top:6px">
               <button class="btn-s" onclick="editOb(${c._i})" style="padding:3px 8px;font-size:10px">✏️</button>
               <button class="btn-s del" onclick="delOb(${c._i})" style="padding:3px 8px;font-size:10px">🗑</button>
@@ -2934,8 +2937,8 @@ function renderQualMonthDetail(m){
     ?`<div style="text-align:center;color:var(--txm);padding:24px;font-size:13px">Nenhum lead com score de qualificação para ${mesLbl}.<br><small>Adicione scores nas Pré-Calls e Reuniões Closer do Report.</small></div>`
     :`<table class="tbl" style="margin-top:4px"><thead><tr><th>Lead</th><th>Fase</th><th>Status</th><th>Score</th></tr></thead><tbody>`+
     sorted.map(l=>`<tr>
-      <td style="font-weight:600;color:var(--tx1)">${l.nome}</td>
-      <td><span class="badge bp">${l.fase}</span></td>
+      <td style="font-weight:600;color:var(--tx1)">${e(l.nome)}</td>
+      <td><span class="badge bp">${e(l.fase)}</span></td>
       <td><span class="badge ${l.status==='Realizada'?'bw':l.status==='No-show'?'bl':'bf'}">${l.status}</span></td>
       <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="font-size:15px;font-weight:700;color:${QUAL_COLORS[l.q]};background:${QUAL_COLORS[l.q]}18;border-radius:6px;padding:2px 10px">${l.q}/5</span><span style="font-size:11px;color:var(--txm)">${QUAL_LABELS[l.q]}</span></span></td>
     </tr>`).join('')+'</tbody></table>';
@@ -3159,8 +3162,8 @@ function renderIAHistory() {
     list.innerHTML = hist.map((h, i) => `
       <div class="ia-hist-item" onclick="expandIAHistory(${i})">
         <div class="ih-header">
-          <span class="ih-month">${h.mesLabel}</span>
-          <span class="ih-date">${h.date}</span>
+          <span class="ih-month">${e(h.mesLabel)}</span>
+          <span class="ih-date">${e(h.date)}</span>
         </div>
         <div class="ih-preview" id="ia-hist-preview-${i}">${h.html.replace(/<[^>]*>/g,'').slice(0,120)}...</div>
         <div id="ia-hist-body-${i}" style="display:none;margin-top:10px" class="ia-body">${h.html}</div>
@@ -3347,17 +3350,17 @@ if(uploadedLeads.length>0){
   `;
   const etapas={};uploadedLeads.forEach(l=>{if(l.etapa)etapas[l.etapa]=(etapas[l.etapa]||0)+1;});
   const mx=Math.max(...Object.values(etapas),1);
-  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([e,n])=>`
-    <div class="pi"><div class="pl" title="${e}">${e}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
+  document.getElementById('base-etapas').innerHTML=Object.entries(etapas).sort((a,b)=>b[1]-a[1]).map(([et,n])=>`
+    <div class="pi"><div class="pl" title="${e(et)}">${e(et)}</div><div class="pt" style="width:140px"><div class="pf" style="width:${Math.round(n/mx*100)}%"></div></div><div class="pn">${n}</div></div>`).join('');
   const sample=uploadedLeads.slice(0,30);
-  const badgeE=e=>e.includes('GANHO')?'bw':e==='LOST'?'bl':/Follow|FUP/i.test(e)?'bf':'bp';
+  const badgeE=et=>et.includes('GANHO')?'bw':et==='LOST'?'bl':/Follow|FUP/i.test(et)?'bf':'bp';
   document.getElementById('tb-base').innerHTML=sample.map((l,i)=>`<tr>
     <td style="color:var(--txm)">${i+1}</td>
-    <td style="font-weight:600;color:var(--tx1)">${l.nome.slice(0,35)}</td>
-    <td><span class="badge ${badgeE(l.etapa)}">${l.etapa.slice(0,28)}</span></td>
-    <td>${l.data}</td>
-    <td style="color:var(--txm)">${l.motivo.slice(0,30)||'—'}</td>
-    <td style="color:var(--txm)">${l.fonte.slice(0,20)||'—'}</td>
+    <td style="font-weight:600;color:var(--tx1)">${e(l.nome.slice(0,35))}</td>
+    <td><span class="badge ${badgeE(l.etapa)}">${e(l.etapa.slice(0,28))}</span></td>
+    <td>${e(l.data)}</td>
+    <td style="color:var(--txm)">${e(l.motivo.slice(0,30))||'—'}</td>
+    <td style="color:var(--txm)">${e(l.fonte.slice(0,20))||'—'}</td>
   </tr>`).join('');
 }
 if(hadSavedData)syncObToReports();

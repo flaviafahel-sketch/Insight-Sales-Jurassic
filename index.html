@@ -362,10 +362,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="ph"><h1>Performance comercial</h1><p>Jurassic · Métricas mensais de SDR e Closer</p></div>
   <div class="mbar">
     <label>Mês:</label>
-    <button class="mbtn on" id="mb-mar" onclick="setM('mar')">Março</button>
-    <button class="mbtn" id="mb-abr" onclick="setM('abr')">Abril</button>
-    <button class="mbtn" id="mb-mai" onclick="setM('mai')">Maio</button>
-    <button class="mbtn" id="mb-jun" onclick="setM('jun')">Junho</button>
+    <div id="mbar-btns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
   </div>
 
   <div class="kpig" id="kpig"></div>
@@ -745,10 +742,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="ct"><span class="dot m"></span>Distribuição de scores (mês selecionado)</div>
       <div class="mbar" style="margin-bottom:12px">
         <label>Mês:</label>
-        <button class="mbtn on" id="qmb-mar" onclick="setQualM('mar')">Março</button>
-        <button class="mbtn" id="qmb-abr" onclick="setQualM('abr')">Abril</button>
-        <button class="mbtn" id="qmb-mai" onclick="setQualM('mai')">Maio</button>
-        <button class="mbtn" id="qmb-jun" onclick="setQualM('jun')">Junho</button>
+        <div id="qual-mbar-btns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
       <div id="qual-dist"></div>
     </div>
@@ -767,10 +761,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <select class="filter-select" id="qual-matrix-mes" onchange="onQualMatrixMonthChange()">
           <option value="all">Todos os meses</option>
-          <option value="MARÇO">Março</option>
-          <option value="ABRIL">Abril</option>
-          <option value="MAIO">Maio</option>
-          <option value="JUNHO">Junho</option>
+          
         </select>
         <span style="font-size:11px;color:var(--txm)">ou período:</span>
         <input type="date" id="qual-matrix-data-ini" class="filter-select" style="padding:7px 10px" onchange="onQualMatrixPeriodChange()">
@@ -840,10 +831,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <select id="ia-mes-select" class="filter-select">
-          <option value="mar">Março</option>
-          <option value="abr">Abril</option>
-          <option value="mai">Maio</option>
-          <option value="jun">Junho</option>
+          
         </select>
         <button class="btn" onclick="generateIAAnalysis()" id="ia-btn">
           ✨ Gerar análise
@@ -887,10 +875,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
     <div class="mbar" style="margin-bottom:0">
       <label>Mês do 1º contato:</label>
-      <button class="mbtn on" id="ob-mb-mar" onclick="setObM('mar')">Março</button>
-      <button class="mbtn" id="ob-mb-abr" onclick="setObM('abr')">Abril</button>
-      <button class="mbtn" id="ob-mb-mai" onclick="setObM('mai')">Maio</button>
-      <button class="mbtn" id="ob-mb-jun" onclick="setObM('jun')">Junho</button>
+      <div id="ob-mbar-btns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     </div>
     <button class="btn" onclick="openObModal()">+ Adicionar lead outbound</button>
   </div>
@@ -936,7 +921,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="fr"><label>Nome do lead</label><input id="ob-nome" placeholder="Ex: João Silva / Evento XYZ"></div>
     <div class="fr"><label>Onde encontrou</label><input id="ob-fonte" placeholder="Ex: Instagram, Indicação, LinkedIn..."></div>
     <div class="fr"><label>Mês do 1º contato</label>
-      <select id="ob-mes"><option value="Março">Março</option><option value="Abril">Abril</option><option value="Maio">Maio</option><option value="Junho">Junho</option></select>
+      <select id="ob-mes"><option value="Março">Março</option></select>
     </div>
     <div class="fr"><label>Status atual</label>
       <select id="ob-status">
@@ -1134,7 +1119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </select>
     </div>
     <div class="fr"><label>Mês</label>
-      <select id="pcr-mes"><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option></select>
+      <select id="pcr-mes"><option>Março</option></select>
     </div>
     <div class="fr"><label>Status</label>
       <select id="pcr-status">
@@ -1175,7 +1160,7 @@ Excel.</button></div><div id="pcr-qual-label" style="font-size:11px;color:var(--
       </select>
     </div>
     <div class="fr"><label>Mês</label>
-      <select id="r-mes"><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option></select>
+      <select id="r-mes"><option>Março</option></select>
     </div>
     <div class="fr"><label>Status</label>
       <select id="r-status">
@@ -1217,7 +1202,7 @@ Excel.</button></div><div id="r-qual-label" style="font-size:11px;color:var(--tx
       </select>
     </div>
     <div class="fr"><label>Mês</label>
-      <select id="c-mes"><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option></select>
+      <select id="c-mes"><option>Março</option></select>
     </div>
     <div class="fr"><label>Tipo de lead</label>
       <select id="c-tipo">
@@ -1360,6 +1345,103 @@ const D={
     ]
   }
 };
+
+// ═══ SISTEMA DE MESES DINÂMICO ═══
+// Mapa mestre de meses: chave curta -> {label, labelUpper, nome do mês em pt-BR}
+// Cresce automaticamente quando um mês novo é detectado.
+const MONTH_DEFS=[
+  {key:'mar',label:'Março',upper:'MARÇO',num:3},
+  {key:'abr',label:'Abril',upper:'ABRIL',num:4},
+  {key:'mai',label:'Maio',upper:'MAIO',num:5},
+  {key:'jun',label:'Junho',upper:'JUNHO',num:6},
+  {key:'jul',label:'Julho',upper:'JULHO',num:7},
+  {key:'ago',label:'Agosto',upper:'AGOSTO',num:8},
+  {key:'set',label:'Setembro',upper:'SETEMBRO',num:9},
+  {key:'out',label:'Outubro',upper:'OUTUBRO',num:10},
+  {key:'nov',label:'Novembro',upper:'NOVEMBRO',num:11},
+  {key:'dez',label:'Dezembro',upper:'DEZEMBRO',num:12},
+];
+
+// Retorna um objeto D[mes] zerado — usado quando o mês ainda não tem dados reais
+function blankMonth(def){
+  return{
+    label:def.label,leads:0,preCallAg:0,preCallFeitas:0,preCallNA:0,leadQual:0,
+    reunioes:0,noShowCloser:0,cMes:0,cAntigo:0,
+    fupWA:0,fupIG:0,fupSucesso:0,fupQuente:0,fupMorno:0,fupFrio:0,
+    erroFup:0,lostMomento:0,lost:0,
+    txShowPre:0,txConv:0,txCloser:0,txLeadsPreCall:0,txPreCallQual:0,txQualReu:0,txReuContratoTotal:0,
+    origRIn:0,origRReeng:0,origROutInd:0,origROut:0,
+    perdas:[],daily:{},reunioes_data:[],contratos_data:[],
+    _auto:true // marcador: foi criado automaticamente, ainda sem dados da planilha
+  };
+}
+
+// Detecta o mês atual e cria a estrutura em D se ainda não existir.
+// Chamado ao iniciar a plataforma e a cada mudança de mês (dia 1).
+function checkAndAddCurrentMonth(){
+  const now=new Date();
+  const currentNum=now.getMonth()+1; // 1=Jan ... 12=Dez
+  const def=MONTH_DEFS.find(m=>m.num===currentNum);
+  if(!def)return; // mês fora do range definido (Jan, Fev não existem na plataforma ainda)
+  if(!D[def.key]){
+    D[def.key]=blankMonth(def);
+    rebuildMonthUI(); // atualiza botões e dropdowns em toda a plataforma
+    saveState();
+  }
+}
+
+// Retorna os meses disponíveis (na ordem MONTH_DEFS) que existem em D
+function availableMonths(){
+  return MONTH_DEFS.filter(m=>D[m.key]);
+}
+
+// Reconstrói TODOS os seletores de mês na plataforma (botões de filtro, dropdowns de
+// formulários, selects de Outbound etc.) de forma dinâmica, baseado em availableMonths().
+function rebuildMonthUI(){
+  const months=availableMonths();
+
+  // 1. Botões de Reports (mbar)
+  const mbar=document.getElementById('mbar-btns');
+  if(mbar){
+    mbar.innerHTML=months.map((m,i)=>
+      `<button class="mbtn${i===0?' on':''}" id="mb-${m.key}" onclick="setM('${m.key}')">${m.label}</button>`
+    ).join('');
+  }
+
+  // 2. Botões de Qualificação (qual-mbar)
+  const qbar=document.getElementById('qual-mbar-btns');
+  if(qbar){
+    qbar.innerHTML=months.map((m,i)=>
+      `<button class="mbtn${i===0?' on':''}" id="qmb-${m.key}" onclick="setQualM('${m.key}')">${m.label}</button>`
+    ).join('');
+  }
+
+  // 3. Botões de Outbound
+  const obar=document.getElementById('ob-mbar-btns');
+  if(obar){
+    obar.innerHTML=months.map((m,i)=>
+      `<button class="mbtn${i===0?' on':''}" id="ob-mb-${m.key}" onclick="setObM('${m.key}')">${m.label}</button>`
+    ).join('');
+  }
+
+  // 4. Selects de filtro de mês na página Leads e Qualificação (Fase × Origem)
+  ['leads-mes-filter','qual-matrix-mes'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML=`<option value="all">Todos os meses</option>`+
+      months.map(m=>`<option value="${m.upper}"${m.upper===cur?' selected':''}>${m.label}</option>`).join('');
+  });
+
+  // 6. Selects de mês dos modais de formulário (Reunião, Contrato, Pré-Call, Outbound)
+  ['r-mes','c-mes','pcr-mes','ob-mes','com-mes'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    const cur=sel.value;
+    // ob-mes tem value=label; os outros têm value=label também
+    sel.innerHTML=months.map(m=>`<option value="${m.label}"${m.label===cur?' selected':''}>${m.label}</option>`).join('');
+  });
+}
 
 // ═══ STATE ═══
 let cur='mar';
@@ -2723,56 +2805,12 @@ function generateMonthsFromBase(){
 }
 
 function rebuildMonthButtons(){
-  const sortedKeys=Object.keys(D).filter(k=>MONTH_ORDER.includes(k)).sort((a,b)=>MONTH_ORDER.indexOf(a)-MONTH_ORDER.indexOf(b));
-  // Reports month bar
-  const mbar=document.querySelector('#page-reports .mbar');
-  const label=mbar.querySelector('label');
-  mbar.innerHTML='';
-  mbar.appendChild(label);
-  sortedKeys.forEach(k=>{
-    const btn=document.createElement('button');
-    btn.className='mbtn'+(k===cur?' on':'');
-    btn.id='mb-'+k;
-    btn.textContent=D[k].label;
-    btn.onclick=()=>setM(k);
-    mbar.appendChild(btn);
-  });
-  // Outbound month bar
-  const obBar=document.querySelector('#page-outbound .mbar');
-  if(obBar){
-    const obLabel=obBar.querySelector('label');
-    obBar.innerHTML='';
-    obBar.appendChild(obLabel);
-    sortedKeys.forEach(k=>{
-      const btn=document.createElement('button');
-      btn.className='mbtn'+(k===curOb?' on':'');
-      btn.id='ob-mb-'+k;
-      btn.textContent=D[k].label;
-      btn.onclick=()=>setObM(k);
-      obBar.appendChild(btn);
-    });
-  }
-  // Modal month dropdowns (reunião, contrato, comissão)
-  ['r-mes','c-mes','com-mes'].forEach(id=>{
-    const sel=document.getElementById(id);
-    if(!sel)return;
-    const curVal=sel.value;
-    sel.innerHTML=sortedKeys.map(k=>`<option value="${D[k].label}">${D[k].label}</option>`).join('');
-    if([...sel.options].some(o=>o.value===curVal))sel.value=curVal;
-  });
-  // Leads page month filter dropdown
-  const leadsMesSel=document.getElementById('leads-mes-filter');
-  if(leadsMesSel){
-    const curVal=leadsMesSel.value;
-    leadsMesSel.innerHTML='<option value="all">Todos os meses</option>'+
-      sortedKeys.map(k=>`<option value="${rawMonthFor(k)}">${D[k].label}</option>`).join('');
-    if([...leadsMesSel.options].some(o=>o.value===curVal))leadsMesSel.value=curVal;
-  }
+  rebuildMonthUI(); // usa o novo sistema dinâmico de meses
 }
 
 function rawMonthFor(key){
-  for(const[raw,k] of Object.entries(MONTH_KEY_MAP)){if(k===key)return raw;}
-  return key;
+  const def=MONTH_DEFS.find(m=>m.key===key);
+  return def?def.upper:key.toUpperCase();
 }
 
 // ═══ OUTBOUND KANBAN ═══
@@ -3886,8 +3924,9 @@ function loadState(){
 // ═══ INIT ═══
 const hadSavedData=loadState();
 checkDailyReset();
-if(hadSavedData)rebuildMonthButtons();
-const firstMonth=Object.keys(D).filter(k=>MONTH_ORDER.includes(k)).sort((a,b)=>MONTH_ORDER.indexOf(a)-MONTH_ORDER.indexOf(b))[0]||'mar';
+checkAndAddCurrentMonth(); // detecta mês atual e cria estrutura se ainda não existir
+rebuildMonthUI(); // constrói todos os botões e selects de mês dinamicamente
+const firstMonth=availableMonths().slice(-1)[0]?.key||'mar'; // começa no mês mais recente
 cur=firstMonth;
 renderAll(cur);
 if(uploadedLeads.length>0){
